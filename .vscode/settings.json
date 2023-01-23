@@ -1,0 +1,4 @@
+{
+  "unocss.root": "packages/mrb-client",
+  "editor.tabSize": 2
+}
