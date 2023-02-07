@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, inject } from 'vue'
 import TableRow from './TableRow.vue'
 
 const props = defineProps<{ rows: number; name: string }>()
 const tableRef = ref<HTMLElement>()
+const registerTable = inject('addTable')
 
 const testDataRow = { name: 'Runner', time: '62:48' }
 
@@ -21,12 +22,14 @@ function logTableRect() {
   if (!tableRef.value) return
   console.log(tableRef.value.getBoundingClientRect())
 }
+
+registerTable(tableRef)
 </script>
 
 <template>
-  <div>
-    <h2 class="sticky top-0 bg-white">{{ name }}</h2>
-    <table ref="tableRef" class="w-full" @click="logTableRect">
+  <div ref="tableRef" @click="logTableRect">
+    <h2 class="sticky top-0 bg-white z-2">{{ name }}</h2>
+    <table class="w-full">
       <thead class="sticky top-6 bg-white">
         <tr>
           <th class="text-left">Rank</th>
