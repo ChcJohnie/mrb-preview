@@ -9,16 +9,22 @@ export interface RunnerData {
   loss: string
 }
 
-defineProps<{ data: RunnerData }>()
+const props = defineProps<{ data: RunnerData; isEven: Boolean }>()
+
+const bgColor = props.isEven ? 'bg-even' : 'bg-white'
 </script>
 
 <template>
-  <tr class="bg-white w-full">
-    <td>{{ data.rank }}.</td>
-    <td>{{ data.surname }} {{ data.firstName }}</td>
-    <td>{{ data.si }}</td>
-    <td>{{ data.club }}</td>
-    <td>{{ data.time }}</td>
-    <td>+ {{ data.loss }}</td>
-  </tr>
+  <div
+    :class="bgColor"
+    class="grid grid-flow-col auto-cols-fr px-3 py-1.5 rounded-lg"
+  >
+    <span>{{ data.rank }}.</span>
+    <span>{{ data.surname }} {{ data.firstName }}</span>
+    <span>{{ data.si }}</span>
+    <span>{{ data.club }}</span>
+    <span>{{ data.time }}</span>
+    <span v-if="data.loss">+ {{ data.loss }}</span>
+    <span v-else></span>
+  </div>
 </template>

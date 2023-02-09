@@ -88,19 +88,16 @@ registerTable(tableRef)
   <div ref="tableRef" @click="logTableRect">
     <TableHeader class="p-3" :category="props.category" />
     <!-- TODO Add 2rem text class -->
-    <table class="w-full p-3 text-3xl font-bold">
-      <thead class="sticky top-6 bg-white hidden">
-        <tr>
-          <th class="text-left">Rank</th>
-          <th class="text-left">Name</th>
-          <th class="text-left">Time</th>
-        </tr>
-      </thead>
-      <tbody>
-        <TableRow :data="firstRow" class="sticky top-16"> </TableRow>
-        <TableRow v-for="row in restRows" :data="row" :key="row.rank">
-        </TableRow>
-      </tbody>
-    </table>
+    <div class="w-full text-3xl font-bold bg-white">
+      <TableRow :data="firstRow" :is-even="false" class="sticky top-16">
+      </TableRow>
+      <TableRow
+        v-for="(row, index) in restRows"
+        :data="row"
+        :key="row.rank"
+        :is-even="index % 2 === 0"
+      >
+      </TableRow>
+    </div>
   </div>
 </template>

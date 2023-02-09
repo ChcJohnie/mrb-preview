@@ -18,6 +18,7 @@ export default defineConfig({
           male: '#00A9A5',
           female: '#B8336A',
           neutral: '#544E61',
+          even: '#EFEFEF',
         },
         fontFamily: {
           mrb: ['"Space Grotesk"', 'Arial'],
