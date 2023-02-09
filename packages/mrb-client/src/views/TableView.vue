@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import TestTable from '@/components/TestTable.vue'
 import ScrollColumn from '@/components/ScrollColumn.vue'
+import type { Category } from '@/types/category'
 
 // import { useQuery } from '@tanstack/vue-query'
 // import axios from 'axios'
@@ -13,6 +14,56 @@ import ScrollColumn from '@/components/ScrollColumn.vue'
 //       .then((res) => res.data),
 //   select: (data) => data.categories,
 // })
+const data: Category[] = [
+  {
+    id: 1,
+    name: 'ABC',
+    length: 10.2,
+    climb: 255,
+    controls: 20,
+    gender: 'M',
+  },
+  {
+    id: 2,
+    name: 'DEF',
+    length: 10.2,
+    climb: 255,
+    controls: 20,
+    gender: 'M',
+  },
+  {
+    id: 3,
+    name: 'GHI',
+    length: 10.2,
+    climb: 255,
+    controls: 20,
+    gender: 'M',
+  },
+  {
+    id: 4,
+    name: 'JKL',
+    length: 10.2,
+    climb: 255,
+    controls: 20,
+    gender: 'M',
+  },
+  {
+    id: 5,
+    name: 'MNO',
+    length: 10.2,
+    climb: 255,
+    controls: 20,
+    gender: 'M',
+  },
+  {
+    id: 6,
+    name: 'PQR',
+    length: 10.2,
+    climb: 255,
+    controls: 20,
+    gender: 'M',
+  },
+]
 </script>
 
 <template>
@@ -24,11 +75,12 @@ import ScrollColumn from '@/components/ScrollColumn.vue'
     </div> -->
 
     <ScrollColumn>
-      <TestTable class="my-4" :name="'ABC'" :rows="10" />
-      <TestTable class="my-4" :name="'ABC'" :rows="10" />
-      <TestTable class="my-4" :name="'DEF'" :rows="20" />
-      <TestTable class="my-4" :name="'GHI'" :rows="5" />
-      <TestTable class="my-4" :name="'JKL'" :rows="15" />
+      <TestTable
+        v-for="category in data"
+        :key="category.id"
+        :category="category"
+        class="my-4"
+      />
     </ScrollColumn>
   </div>
 </template>
