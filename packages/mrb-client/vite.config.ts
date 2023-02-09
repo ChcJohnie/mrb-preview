@@ -13,6 +13,16 @@ export default defineConfig({
     vue(),
     Unocss({
       presets: [presetWind(), presetAttributify(), presetIcons()],
+      theme: {
+        colors: {
+          male: '#00A9A5',
+          female: '#B8336A',
+          neutral: '#544E61',
+        },
+        fontFamily: {
+          mrb: ['"Space Grotesk"', 'Arial'],
+        },
+      },
     }),
   ],
   resolve: {

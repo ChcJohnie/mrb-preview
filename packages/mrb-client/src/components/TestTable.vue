@@ -31,8 +31,9 @@ registerTable(tableRef)
 
 <template>
   <div ref="tableRef" @click="logTableRect">
-    <TableHeader :category="props.category" />
-    <table class="w-full text-3xl font-bold">
+    <TableHeader class="p-3" :category="props.category" />
+    <!-- TODO Add 2rem text class -->
+    <table class="w-full p-3 text-3xl font-bold">
       <thead class="sticky top-6 bg-white hidden">
         <tr>
           <th class="text-left">Rank</th>
@@ -41,7 +42,7 @@ registerTable(tableRef)
         </tr>
       </thead>
       <tbody>
-        <TableRow :data="firstRow" class="sticky top-10"> </TableRow>
+        <TableRow :data="firstRow" class="sticky top-16"> </TableRow>
         <TableRow v-for="row in restRows" :data="row" :key="row.rank">
         </TableRow>
       </tbody>

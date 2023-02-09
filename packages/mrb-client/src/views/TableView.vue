@@ -17,7 +17,7 @@ import type { Category } from '@/types/category'
 const data: Category[] = [
   {
     id: 1,
-    name: 'ABC',
+    name: 'H21C',
     length: 10.2,
     climb: 255,
     controls: 20,
@@ -25,19 +25,19 @@ const data: Category[] = [
   },
   {
     id: 2,
-    name: 'DEF',
-    length: 10.2,
-    climb: 255,
-    controls: 20,
-    gender: 'M',
+    name: 'D21C',
+    length: 8.2,
+    climb: 150,
+    controls: 16,
+    gender: 'F',
   },
   {
     id: 3,
-    name: 'GHI',
+    name: 'HDR',
     length: 10.2,
     climb: 255,
     controls: 20,
-    gender: 'M',
+    gender: 'X',
   },
   {
     id: 4,
@@ -67,14 +67,14 @@ const data: Category[] = [
 </script>
 
 <template>
-  <div class="px-4 py-5 sm:px-6">
+  <div class="font-mrb">
     <!-- <div v-if="!isLoading && !isError">
       <span v-for="category in data" :key="category.id">{{
         category.name
       }}</span>
     </div> -->
 
-    <ScrollColumn>
+    <ScrollColumn class="px-2">
       <TestTable
         v-for="category in data"
         :key="category.id"
