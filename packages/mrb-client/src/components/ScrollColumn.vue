@@ -1,7 +1,9 @@
 <script lang="ts" setup>
-import { provide, ref } from 'vue'
+import { provide, ref, watch, unref } from 'vue'
 import type { Ref } from 'vue'
 
+let activeScroll: null | Function = null
+const scrollType = ref('none')
 const columnRef = ref<HTMLElement>()
 const tableRegistry: Ref<HTMLElement>[] = []
 const registerTableElement = (component: Ref<HTMLElement>) =>
@@ -13,6 +15,15 @@ function logSlots() {
 }
 
 window.setTimeout(logSlots, 1000)
+
+function isColumnBottom() {
+  if (!columnRef.value) return true
+  return isFullyDisplayed(columnRef.value)
+}
+
+function scrollColumnToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
 
 // find last visible table
 function findLastVisibleTable() {
@@ -26,8 +37,9 @@ function findLastVisibleTable() {
     })
 }
 
-function isFullyDisplayed(table: Ref<HTMLElement>) {
-  const rect = table.value.getBoundingClientRect()
+function isFullyDisplayed(table: Ref<HTMLElement> | HTMLElement) {
+  const tableElement = unref(table)
+  const rect = tableElement.getBoundingClientRect()
   const bottomMargin = rootFontSizePx
   const tablePxRemaining = rect.bottom - window.innerHeight
   return Math.floor(tablePxRemaining) <= bottomMargin
@@ -37,7 +49,7 @@ const STICKY_HEADER_REMS = 4.5
 const rootFontSize = window.getComputedStyle(document.documentElement).fontSize
 const rootFontSizePx = parseInt(rootFontSize.slice(0, -2))
 
-function scrollByHeight() {
+function scrollDownByHeight() {
   const wHeight = window.innerHeight
   const lastTable = findLastVisibleTable()
   const heightSubtract =
@@ -49,7 +61,52 @@ function scrollByHeight() {
   // TODO Lessen scroll y if for last newly visible table only heading will be visible
 }
 
-function scrollContinuously() {
+function scrollByPage() {
+  if (isColumnBottom()) scrollColumnToTop()
+  else scrollDownByHeight()
+}
+
+function setupPageScroll() {
+  const scrollNumber = window.setInterval(scrollByPage, 2000)
+  const cancel = () => window.clearInterval(scrollNumber)
+  return cancel
+}
+
+function setScrollType(type: string) {
+  scrollType.value = type
+}
+
+watch(scrollType, (type) => {
+  if (activeScroll) {
+    activeScroll()
+    activeScroll = null
+  }
+  if (type === 'none') return
+  if (type === 'page') {
+    activeScroll = setupPageScroll()
+  }
+  if (type === 'continues') activeScroll = setupContinuesScroll()
+})
+/*
+
+Page scroll
+
+Interval 
+
+  IsBottom ? 
+    ScrollByPage
+    ScrollToTop
+
+*/
+
+function setupContinuesScroll() {
+  const isCancelled = ref(false)
+  const cancel = () => (isCancelled.value = true)
+  scrollContinuously(isCancelled)
+  return cancel
+}
+
+function scrollContinuously(isCancelled: Ref<Boolean>) {
   const duration = 20 * 1000
   const rect = columnRef.value?.getBoundingClientRect()
   const scrollLength = rect ? rect.bottom - window.innerHeight : 0
@@ -61,6 +118,10 @@ function scrollContinuously() {
   let requestId: number | null
 
   const loop = function (currentTime: DOMHighResTimeStamp) {
+    if (isCancelled.value) {
+      if (requestId) window.cancelAnimationFrame(requestId)
+      return
+    }
     if (!startTime) {
       startTime = currentTime
     }
@@ -76,6 +137,8 @@ function scrollContinuously() {
       requestId = window.requestAnimationFrame(loop)
     } else if (requestId) {
       window.cancelAnimationFrame(requestId)
+      scrollColumnToTop()
+      scrollContinuously(isCancelled)
     }
   }
   requestId = window.requestAnimationFrame(loop)
@@ -84,18 +147,31 @@ function scrollContinuously() {
 
 <template>
   <div ref="columnRef">
-    <button
-      class="fixed bottom-6 z-3 bg-white border-black border-2"
-      @click="scrollByHeight"
-    >
-      Scroll by height
-    </button>
-    <button
-      class="fixed bottom-6 left-60 z-3 bg-white border-black border-2"
-      @click="scrollContinuously"
-    >
-      Continues scroll
-    </button>
+    <div class="fixed bottom-12 z-3 bg-white border-black border-2">
+      <span>SCROLL: {{ scrollType }}</span>
+    </div>
+    <div class="fixed bottom-6 z-3 flex gap-3">
+      <button
+        class="bg-white border-black border-2"
+        @click="setScrollType('page')"
+      >
+        Scroll by height
+      </button>
+      <button
+        class="bg-white border-black border-2"
+        @click="setScrollType('continues')"
+      >
+        Continues scroll
+      </button>
+
+      <button
+        class="bg-white border-black border-2"
+        @click="setScrollType('none')"
+      >
+        No scroll
+      </button>
+    </div>
+
     <slot> </slot>
   </div>
 </template>
