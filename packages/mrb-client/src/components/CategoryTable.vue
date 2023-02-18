@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { ref, inject } from 'vue'
+import { ref, inject, onMounted } from 'vue'
 import TableHeader from './CategoryTableHeader.vue'
 import TableRow from './CategoryTableRow.vue'
 
 import { addScrollTableElementKey } from '@/types/providers'
 import type { Category, RawRunner, RunnerWithStats } from '@/types/category'
 
-const props = defineProps<{ category: Category }>()
+const props = defineProps<{
+  category: Category
+  runners?: RawRunner[]
+}>()
 const rows = Math.floor(Math.random() * 20) + 10
 
 const tableRef = ref<HTMLElement | null>(null)
@@ -19,13 +22,15 @@ const getRandomTime = () => {
   const timeS = Math.floor(Math.random() * 60)
   return { timeM, timeS }
 }
-const rawData: RawRunner[] = new Array(rows).fill(testDataRow).map(() => ({
-  surname: 'Doe',
-  firstName: props.category.gender === 'F' ? 'Jane' : 'Joe',
-  si: '81234567',
-  club: 'Czech republic',
-  ...getRandomTime(),
-}))
+const rawData: RawRunner[] =
+  props.runners ??
+  new Array(rows).fill(testDataRow).map(() => ({
+    surname: 'Doe',
+    firstName: props.category.gender === 'F' ? 'Jane' : 'Joe',
+    si: '81234567',
+    club: 'Czech republic',
+    ...getRandomTime(),
+  }))
 
 rawData.sort((a, b) => {
   if (a.timeM !== b.timeM) return a.timeM - b.timeM
@@ -82,7 +87,9 @@ function logTableRect() {
   console.log(tableRef.value.getBoundingClientRect())
 }
 
-if (addScrollTable && tableRef.value) addScrollTable(tableRef)
+onMounted(() => {
+  if (addScrollTable && tableRef.value) addScrollTable(ref(tableRef.value))
+})
 </script>
 
 <template>

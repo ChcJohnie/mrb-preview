@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import ScrollColumn from '@/components/ScrollColumn.vue'
 import CategoryTable from '@/components/CategoryTable.vue'
+import CategoryTestTable from '@/components/CategoryTestTable.vue'
 import TableSettings from '@/components/TableSettings.vue'
+import { useTableSizingStore } from '@/stores/tableSizing'
 import type { Category } from '@/types/category'
 
 // import { useQuery } from '@tanstack/vue-query'
@@ -15,6 +18,10 @@ import type { Category } from '@/types/category'
 //       .then((res) => res.data),
 //   select: (data) => data.categories,
 // })
+
+const tableViewRef = ref<HTMLElement | null>(null)
+const tableSizing = useTableSizingStore()
+
 const data: Category[] = [
   {
     id: 1,
@@ -65,24 +72,33 @@ const data: Category[] = [
     gender: 'M',
   },
 ]
+
+onMounted(() => {
+  if (!tableViewRef.value) return
+  const tableViewElementRect = tableViewRef.value.getBoundingClientRect()
+  tableSizing.tableViewHeight = tableViewElementRect.height
+  tableSizing.setAnalyzed(true)
+  console.log(tableSizing)
+})
 </script>
 
 <template>
-  <div class="font-mrb grow flex overflow-hidden">
+  <div ref="tableViewRef" class="font-mrb grow flex overflow-hidden">
     <!-- <div v-if="!isLoading && !isError">
       <span v-for="category in data" :key="category.id">{{
         category.name
       }}</span>
     </div> -->
 
-    <ScrollColumn>
+    <ScrollColumn v-if="tableSizing.isAnalyzed">
       <CategoryTable
         v-for="category in data"
         :key="category.id"
         :category="category"
-        class="my-4"
+        class="mb-4"
       />
     </ScrollColumn>
+    <CategoryTestTable v-else />
     <TableSettings class="fixed bottom-6 right-0 z-3" />
   </div>
 </template>

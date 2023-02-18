@@ -14,14 +14,10 @@ const columnRect = computed(() => {
   if (!columnWrapper.value) return { top: 0, height: 100, bottom: 100 } // Placeholder until columnWrapper is set
   return columnWrapper.value.getBoundingClientRect()
 })
+
 const tableRefsRegistry: Ref<HTMLElement>[] = []
-const registerTableElement: AddScrollTableElementFn = (component) => {
-  const rawComponent = unref(component)
-  if (rawComponent) {
-    // TODO ugly type narrowing
-    tableRefsRegistry.push(ref(rawComponent))
-  }
-}
+const registerTableElement: AddScrollTableElementFn = (component) =>
+  tableRefsRegistry.push(component)
 provide(addScrollTableElementKey, registerTableElement)
 
 function logSlots() {
@@ -170,7 +166,7 @@ function scrollContinuously(isCancelled: Ref<Boolean>) {
 </script>
 
 <template>
-  <div class="flex-1 overflow-scroll" ref="columnWrapper">
+  <div class="flex-1 overflow-y-scroll" ref="columnWrapper">
     <div ref="columnContent" class="px-2"><slot> </slot></div>
   </div>
 </template>
