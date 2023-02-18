@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, inject } from 'vue'
-import TableHeader from './TableHeader.vue'
-import TableRow from './TableRow.vue'
+import TableHeader from './CategoryTableHeader.vue'
+import TableRow from './CategoryTableRow.vue'
 
 import type { Category, RawRunner, RunnerWithStats } from '@/types/category'
 

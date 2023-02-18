@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ScrollColumn from '@/components/ScrollColumn.vue'
-import TestTable from '@/components/TestTable.vue'
+import CategoryTable from '@/components/CategoryTable.vue'
 import TableSettings from '@/components/TableSettings.vue'
 import type { Category } from '@/types/category'
 
@@ -76,7 +76,7 @@ const data: Category[] = [
     </div> -->
 
     <ScrollColumn>
-      <TestTable
+      <CategoryTable
         v-for="category in data"
         :key="category.id"
         :category="category"
