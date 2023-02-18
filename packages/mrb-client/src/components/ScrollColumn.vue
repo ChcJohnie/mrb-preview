@@ -1,8 +1,10 @@
 <script lang="ts" setup>
-import { provide, ref, watch, unref, computed } from 'vue'
+import { provide, ref, unref, watch, computed } from 'vue'
 import type { Ref } from 'vue'
 
 import { useSettingStore } from '@/stores/settings'
+import { addScrollTableElementKey } from '@/types/providers'
+import type { AddScrollTableElementFn } from '@/types/providers'
 
 let activeScroll: null | Function = null
 const settingsStore = useSettingStore()
@@ -12,15 +14,19 @@ const columnRect = computed(() => {
   if (!columnWrapper.value) return { top: 0, height: 100, bottom: 100 } // Placeholder until columnWrapper is set
   return columnWrapper.value.getBoundingClientRect()
 })
-const tableRegistry: Ref<HTMLElement>[] = []
-const registerTableElement = (component: Ref<HTMLElement>) =>
-  tableRegistry.push(component)
-provide('addTable', registerTableElement)
+const tableRefsRegistry: Ref<HTMLElement>[] = []
+const registerTableElement: AddScrollTableElementFn = (component) => {
+  const rawComponent = unref(component)
+  if (rawComponent) {
+    // TODO ugly type narrowing
+    tableRefsRegistry.push(ref(rawComponent))
+  }
+}
+provide(addScrollTableElementKey, registerTableElement)
 
 function logSlots() {
-  console.log(tableRegistry)
+  console.log(tableRefsRegistry)
 }
-
 window.setTimeout(logSlots, 1000)
 
 function isColumnBottom() {
@@ -34,7 +40,7 @@ function scrollColumnToTop() {
 
 // find last visible table
 function findLastVisibleTable() {
-  return tableRegistry
+  return tableRefsRegistry
     .slice()
     .reverse()
     .find((table) => {
@@ -102,9 +108,9 @@ watch(
 
 Page scroll
 
-Interval 
+Interval
 
-  IsBottom ? 
+  IsBottom ?
     ScrollByPage
     ScrollToTop
 

@@ -3,13 +3,14 @@ import { ref, inject } from 'vue'
 import TableHeader from './CategoryTableHeader.vue'
 import TableRow from './CategoryTableRow.vue'
 
+import { addScrollTableElementKey } from '@/types/providers'
 import type { Category, RawRunner, RunnerWithStats } from '@/types/category'
 
 const props = defineProps<{ category: Category }>()
 const rows = Math.floor(Math.random() * 20) + 10
 
-const tableRef = ref<HTMLElement>()
-const registerTable = inject('addTable')
+const tableRef = ref<HTMLElement | null>(null)
+const addScrollTable = inject(addScrollTableElementKey)
 
 const testDataRow = {}
 
@@ -81,7 +82,7 @@ function logTableRect() {
   console.log(tableRef.value.getBoundingClientRect())
 }
 
-registerTable(tableRef)
+if (addScrollTable && tableRef.value) addScrollTable(tableRef)
 </script>
 
 <template>
