@@ -1,4 +1,5 @@
 import { ref, computed } from 'vue'
+import { refDebounced } from '@vueuse/core'
 import { defineStore } from 'pinia'
 
 export const useTableSizingStore = defineStore('tableSizing', () => {
@@ -13,17 +14,18 @@ export const useTableSizingStore = defineStore('tableSizing', () => {
       headerHeight.value > 0
   )
 
-  const isAnalyzed = ref(false)
+  const _isAnalyzed = ref(false)
+  const isAnalyzed = refDebounced(_isAnalyzed, 100)
 
   function setAnalyzed(status: boolean) {
-    if (status === isAnalyzed.value) return
+    if (status === _isAnalyzed.value) return
     if (status && areParamsSet.value) {
-      isAnalyzed.value = true
+      _isAnalyzed.value = true
     } else if (!status) {
       tableViewHeight.value = 0
       lineHeight.value = 0
       headerHeight.value = 0
-      isAnalyzed.value = false
+      _isAnalyzed.value = false
     }
   }
 

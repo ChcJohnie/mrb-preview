@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
+import { useResizeObserver } from '@vueuse/core'
+
 import ScrollColumn from '@/components/ScrollColumn.vue'
 import CategoryTable from '@/components/CategoryTable.vue'
 import CategoryTestTable from '@/components/CategoryTestTable.vue'
@@ -73,13 +75,15 @@ const data: Category[] = [
   },
 ]
 
-onMounted(() => {
+function analyzeTableSizes() {
   if (!tableViewRef.value) return
+  tableSizing.setAnalyzed(false)
   const tableViewElementRect = tableViewRef.value.getBoundingClientRect()
   tableSizing.tableViewHeight = tableViewElementRect.height
   tableSizing.setAnalyzed(true)
-  console.log(tableSizing)
-})
+}
+
+useResizeObserver(tableViewRef, analyzeTableSizes)
 </script>
 
 <template>

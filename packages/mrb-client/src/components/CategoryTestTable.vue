@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { provide, unref } from 'vue'
+import { provide, ref, unref } from 'vue'
+import { useIntervalFn } from '@vueuse/core'
+
 import CategoryTable from './CategoryTable.vue'
 
 import { useTableSizingStore } from '@/stores/tableSizing'
@@ -9,17 +11,23 @@ import { addScrollTableElementKey } from '@/types/providers'
 import type { AddScrollTableElementFn } from '@/types/providers'
 
 const tableSizing = useTableSizingStore()
+const testTableElement = ref<HTMLElement>()
 
-const analyzeTestTable: AddScrollTableElementFn = (component) => {
-  const tableElement = unref(component)
+const setTestTable: AddScrollTableElementFn = (component) => {
+  testTableElement.value = component.value
+  analyzeTestTable()
+}
+useIntervalFn(analyzeTestTable, 100)
+provide(addScrollTableElementKey, setTestTable)
+
+function analyzeTestTable() {
+  const tableElement = unref(testTableElement)
   if (!tableElement) return
   const [headerElement, runnerElement] = tableElement.children // ! Implementation detail, expect cat header as first child
   tableSizing.headerHeight = headerElement.getBoundingClientRect().height
   tableSizing.lineHeight = runnerElement.getBoundingClientRect().height
   tableSizing.setAnalyzed(true)
-  console.log(tableSizing)
 }
-provide(addScrollTableElementKey, analyzeTestTable)
 
 const testCategory: Category = {
   id: 1,
