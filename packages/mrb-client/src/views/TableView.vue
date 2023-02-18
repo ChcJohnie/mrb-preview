@@ -67,14 +67,14 @@ const data: Category[] = [
 </script>
 
 <template>
-  <div class="font-mrb">
+  <div class="font-mrb grow flex overflow-hidden">
     <!-- <div v-if="!isLoading && !isError">
       <span v-for="category in data" :key="category.id">{{
         category.name
       }}</span>
     </div> -->
 
-    <ScrollColumn class="px-2">
+    <ScrollColumn>
       <TestTable
         v-for="category in data"
         :key="category.id"

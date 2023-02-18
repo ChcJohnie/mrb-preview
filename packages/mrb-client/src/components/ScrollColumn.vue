@@ -1,10 +1,15 @@
 <script lang="ts" setup>
-import { provide, ref, watch, unref } from 'vue'
+import { provide, ref, watch, unref, computed } from 'vue'
 import type { Ref } from 'vue'
 
 let activeScroll: null | Function = null
 const scrollType = ref('none')
-const columnRef = ref<HTMLElement>()
+const columnWrapper = ref<HTMLElement | null>(null)
+const columnContent = ref<HTMLElement | null>(null)
+const columnRect = computed(() => {
+  if (!columnWrapper.value) return { top: 0, height: 100 }
+  return columnWrapper.value.getBoundingClientRect()
+})
 const tableRegistry: Ref<HTMLElement>[] = []
 const registerTableElement = (component: Ref<HTMLElement>) =>
   tableRegistry.push(component)
@@ -17,12 +22,12 @@ function logSlots() {
 window.setTimeout(logSlots, 1000)
 
 function isColumnBottom() {
-  if (!columnRef.value) return true
-  return isFullyDisplayed(columnRef.value)
+  if (!columnContent.value) return true
+  return isFullyDisplayed(columnContent.value)
 }
 
 function scrollColumnToTop() {
-  window.scrollTo({ top: 0, behavior: 'smooth' })
+  columnWrapper.value?.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 // find last visible table
@@ -33,7 +38,10 @@ function findLastVisibleTable() {
     .find((table) => {
       const rect = table.value.getBoundingClientRect()
       // console.log(rect)
-      return rect.top < window.innerHeight && rect.bottom > 0
+      return (
+        rect.top < columnRect.value.top + columnRect.value.height &&
+        rect.bottom > columnRect.value.top
+      )
     })
 }
 
@@ -41,7 +49,7 @@ function isFullyDisplayed(table: Ref<HTMLElement> | HTMLElement) {
   const tableElement = unref(table)
   const rect = tableElement.getBoundingClientRect()
   const bottomMargin = rootFontSizePx
-  const tablePxRemaining = rect.bottom - window.innerHeight
+  const tablePxRemaining = rect.bottom - columnRect.value.top
   return Math.floor(tablePxRemaining) <= bottomMargin
 }
 
@@ -50,14 +58,14 @@ const rootFontSize = window.getComputedStyle(document.documentElement).fontSize
 const rootFontSizePx = parseInt(rootFontSize.slice(0, -2))
 
 function scrollDownByHeight() {
-  const wHeight = window.innerHeight
+  const wHeight = columnRect.value.height
   const lastTable = findLastVisibleTable()
   const heightSubtract =
     lastTable && isFullyDisplayed(lastTable)
       ? 0
       : STICKY_HEADER_REMS * rootFontSizePx
   const height = wHeight - heightSubtract
-  if (height) window.scrollBy({ top: height, behavior: 'smooth' })
+  if (height) columnWrapper.value?.scrollBy({ top: height, behavior: 'smooth' })
   // TODO Lessen scroll y if for last newly visible table only heading will be visible
 }
 
@@ -81,6 +89,7 @@ watch(scrollType, (type) => {
     activeScroll()
     activeScroll = null
   }
+  if (columnWrapper.value === null || columnContent.value === null) return
   if (type === 'none') return
   if (type === 'page') {
     activeScroll = setupPageScroll()
@@ -108,11 +117,15 @@ function setupContinuesScroll() {
 
 function scrollContinuously(isCancelled: Ref<Boolean>) {
   const duration = 20 * 1000
-  const rect = columnRef.value?.getBoundingClientRect()
-  const scrollLength = rect ? rect.bottom - window.innerHeight : 0
+  if (columnWrapper.value === null) return
+  if (columnContent.value === null) return
+  const wrapperRect = columnWrapper.value.getBoundingClientRect()
+  const contentRect = columnContent.value.getBoundingClientRect()
+  const scrollLength =
+    contentRect.bottom - (wrapperRect.height + wrapperRect.top)
 
-  const startPos = window.pageYOffset
-  const diff = scrollLength ?? 0
+  const startPos = wrapperRect.top - contentRect.top
+  const diff = scrollLength
 
   let startTime: number | null = null
   let requestId: number | null
@@ -130,7 +143,7 @@ function scrollContinuously(isCancelled: Ref<Boolean>) {
     const time = currentTime - startTime
 
     const percent = Math.min(time / duration, 1)
-    window.scrollTo(0, startPos + diff * percent)
+    columnWrapper.value?.scrollTo(0, startPos + diff * percent)
 
     if (time < duration) {
       // Continue moving
@@ -138,7 +151,7 @@ function scrollContinuously(isCancelled: Ref<Boolean>) {
     } else if (requestId) {
       window.cancelAnimationFrame(requestId)
       scrollColumnToTop()
-      scrollContinuously(isCancelled)
+      // scrollContinuously(isCancelled)
     }
   }
   requestId = window.requestAnimationFrame(loop)
@@ -146,7 +159,7 @@ function scrollContinuously(isCancelled: Ref<Boolean>) {
 </script>
 
 <template>
-  <div ref="columnRef">
+  <div class="flex-1 overflow-scroll" ref="columnWrapper">
     <div class="fixed bottom-12 z-3 bg-white border-black border-2">
       <span>SCROLL: {{ scrollType }}</span>
     </div>
@@ -171,7 +184,6 @@ function scrollContinuously(isCancelled: Ref<Boolean>) {
         No scroll
       </button>
     </div>
-
-    <slot> </slot>
+    <div ref="columnContent" class="px-2"><slot> </slot></div>
   </div>
 </template>
