@@ -2,8 +2,10 @@
 import { provide, ref, watch, unref, computed } from 'vue'
 import type { Ref } from 'vue'
 
+import { useSettingStore } from '@/stores/settings'
+
 let activeScroll: null | Function = null
-const scrollType = ref('none')
+const settingsStore = useSettingStore()
 const columnWrapper = ref<HTMLElement | null>(null)
 const columnContent = ref<HTMLElement | null>(null)
 const columnRect = computed(() => {
@@ -80,22 +82,22 @@ function setupPageScroll() {
   return cancel
 }
 
-function setScrollType(type: string) {
-  scrollType.value = type
-}
-
-watch(scrollType, (type) => {
-  if (activeScroll) {
-    activeScroll()
-    activeScroll = null
-  }
-  if (columnWrapper.value === null || columnContent.value === null) return
-  if (type === 'none') return
-  if (type === 'page') {
-    activeScroll = setupPageScroll()
-  }
-  if (type === 'continues') activeScroll = setupContinuesScroll()
-})
+watch(
+  () => settingsStore.scrollType,
+  (type) => {
+    if (activeScroll) {
+      activeScroll()
+      activeScroll = null
+    }
+    if (columnWrapper.value === null || columnContent.value === null) return
+    if (type === 'none') return
+    if (type === 'page') {
+      activeScroll = setupPageScroll()
+    }
+    if (type === 'continues') activeScroll = setupContinuesScroll()
+  },
+  { immediate: true }
+)
 /*
 
 Page scroll
@@ -163,30 +165,6 @@ function scrollContinuously(isCancelled: Ref<Boolean>) {
 
 <template>
   <div class="flex-1 overflow-scroll" ref="columnWrapper">
-    <div class="fixed bottom-12 z-3 bg-white border-black border-2">
-      <span>SCROLL: {{ scrollType }}</span>
-    </div>
-    <div class="fixed bottom-6 z-3 flex gap-3">
-      <button
-        class="bg-white border-black border-2"
-        @click="setScrollType('page')"
-      >
-        Scroll by height
-      </button>
-      <button
-        class="bg-white border-black border-2"
-        @click="setScrollType('continues')"
-      >
-        Continues scroll
-      </button>
-
-      <button
-        class="bg-white border-black border-2"
-        @click="setScrollType('none')"
-      >
-        No scroll
-      </button>
-    </div>
     <div ref="columnContent" class="px-2"><slot> </slot></div>
   </div>
 </template>

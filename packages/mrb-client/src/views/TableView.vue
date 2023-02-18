@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import TestTable from '@/components/TestTable.vue'
 import ScrollColumn from '@/components/ScrollColumn.vue'
+import TestTable from '@/components/TestTable.vue'
+import TableSettings from '@/components/TableSettings.vue'
 import type { Category } from '@/types/category'
 
 // import { useQuery } from '@tanstack/vue-query'
@@ -82,5 +83,6 @@ const data: Category[] = [
         class="my-4"
       />
     </ScrollColumn>
+    <TableSettings class="fixed bottom-6 right-0 z-3" />
   </div>
 </template>
