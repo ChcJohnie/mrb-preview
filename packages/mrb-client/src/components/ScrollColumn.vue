@@ -7,7 +7,7 @@ const scrollType = ref('none')
 const columnWrapper = ref<HTMLElement | null>(null)
 const columnContent = ref<HTMLElement | null>(null)
 const columnRect = computed(() => {
-  if (!columnWrapper.value) return { top: 0, height: 100 }
+  if (!columnWrapper.value) return { top: 0, height: 100, bottom: 100 } // Placeholder until columnWrapper is set
   return columnWrapper.value.getBoundingClientRect()
 })
 const tableRegistry: Ref<HTMLElement>[] = []
@@ -49,7 +49,7 @@ function isFullyDisplayed(table: Ref<HTMLElement> | HTMLElement) {
   const tableElement = unref(table)
   const rect = tableElement.getBoundingClientRect()
   const bottomMargin = rootFontSizePx
-  const tablePxRemaining = rect.bottom - columnRect.value.top
+  const tablePxRemaining = rect.bottom - columnRect.value.bottom
   return Math.floor(tablePxRemaining) <= bottomMargin
 }
 
@@ -150,8 +150,11 @@ function scrollContinuously(isCancelled: Ref<Boolean>) {
       requestId = window.requestAnimationFrame(loop)
     } else if (requestId) {
       window.cancelAnimationFrame(requestId)
-      scrollColumnToTop()
-      // scrollContinuously(isCancelled)
+      window.setTimeout(() => {
+        if (isCancelled.value) return
+        scrollColumnToTop()
+        window.setTimeout(() => scrollContinuously(isCancelled), 2000)
+      }, 2000)
     }
   }
   requestId = window.requestAnimationFrame(loop)
