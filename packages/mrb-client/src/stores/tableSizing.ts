@@ -14,6 +14,11 @@ export const useTableSizingStore = defineStore('tableSizing', () => {
       headerHeight.value > 0
   )
 
+  // Approximate number of lines that can be displayed in the table, with headers and whitespace this should be max lines number
+  const lineNumber = computed(() =>
+    lineHeight.value ? Math.floor(tableViewHeight.value / lineHeight.value) : 0
+  )
+
   const _isAnalyzed = ref(false)
   const isAnalyzed = refDebounced(_isAnalyzed, 100)
 
@@ -29,5 +34,12 @@ export const useTableSizingStore = defineStore('tableSizing', () => {
     }
   }
 
-  return { isAnalyzed, tableViewHeight, lineHeight, headerHeight, setAnalyzed }
+  return {
+    isAnalyzed,
+    tableViewHeight,
+    lineHeight,
+    headerHeight,
+    lineNumber,
+    setAnalyzed,
+  }
 })

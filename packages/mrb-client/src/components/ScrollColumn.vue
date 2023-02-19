@@ -1,13 +1,17 @@
 <script lang="ts" setup>
 import { provide, ref, unref, watch, computed } from 'vue'
 import type { Ref } from 'vue'
+import { useIntervalFn } from '@vueuse/core'
 
 import { useSettingStore } from '@/stores/settings'
+import { useTableSizingStore } from '@/stores/tableSizing'
 import { addScrollTableElementKey } from '@/types/providers'
 import type { AddScrollTableElementFn } from '@/types/providers'
 
 let activeScroll: null | Function = null
 const settingsStore = useSettingStore()
+const tableSizing = useTableSizingStore()
+
 const columnWrapper = ref<HTMLElement | null>(null)
 const columnContent = ref<HTMLElement | null>(null)
 const columnRect = computed(() => {
@@ -20,10 +24,9 @@ const registerTableElement: AddScrollTableElementFn = (component) =>
   tableRefsRegistry.push(component)
 provide(addScrollTableElementKey, registerTableElement)
 
-function logSlots() {
-  console.log(tableRefsRegistry)
-}
-window.setTimeout(logSlots, 1000)
+const visiblePageReadInMS = computed(
+  () => tableSizing.lineNumber * settingsStore.readLineTimeMS
+)
 
 function isColumnBottom() {
   if (!columnContent.value) return true
@@ -79,8 +82,20 @@ function scrollByPage() {
 }
 
 function setupPageScroll() {
-  const scrollNumber = window.setInterval(scrollByPage, 2000)
-  const cancel = () => window.clearInterval(scrollNumber)
+  const { pause, resume, isActive } = useIntervalFn(
+    scrollByPage,
+    visiblePageReadInMS.value
+  )
+  const removeIntervalWatch = watch(visiblePageReadInMS, (newVal) => {
+    const isInterval = newVal !== 0
+    if (isInterval === isActive.value) return
+    if (isInterval) resume()
+    else pause()
+  })
+  const cancel = () => {
+    removeIntervalWatch()
+    pause()
+  }
   return cancel
 }
 
@@ -115,18 +130,27 @@ Interval
 function setupContinuesScroll() {
   const isCancelled = ref(false)
   const cancel = () => (isCancelled.value = true)
-  scrollContinuously(isCancelled)
+  startContinuesScroll(isCancelled)
   return cancel
 }
 
+function startContinuesScroll(isCancelled: Ref<Boolean>) {
+  window.setTimeout(() => {
+    if (isCancelled.value) return
+    scrollContinuously(isCancelled)
+  }, visiblePageReadInMS.value / 2)
+}
+
 function scrollContinuously(isCancelled: Ref<Boolean>) {
-  const duration = 20 * 1000
   if (columnWrapper.value === null) return
   if (columnContent.value === null) return
   const wrapperRect = columnWrapper.value.getBoundingClientRect()
   const contentRect = columnContent.value.getBoundingClientRect()
   const scrollLength =
     contentRect.bottom - (wrapperRect.height + wrapperRect.top)
+  const scrollDuration =
+    Math.floor(scrollLength / tableSizing.lineHeight) *
+    settingsStore.readLineTimeMS
 
   const startPos = wrapperRect.top - contentRect.top
   const diff = scrollLength
@@ -146,10 +170,10 @@ function scrollContinuously(isCancelled: Ref<Boolean>) {
     // Elapsed time in miliseconds
     const time = currentTime - startTime
 
-    const percent = Math.min(time / duration, 1)
+    const percent = Math.min(time / scrollDuration, 1)
     columnWrapper.value?.scrollTo(0, startPos + diff * percent)
 
-    if (time < duration) {
+    if (time < scrollDuration) {
       // Continue moving
       requestId = window.requestAnimationFrame(loop)
     } else if (requestId) {
@@ -157,8 +181,8 @@ function scrollContinuously(isCancelled: Ref<Boolean>) {
       window.setTimeout(() => {
         if (isCancelled.value) return
         scrollColumnToTop()
-        window.setTimeout(() => scrollContinuously(isCancelled), 2000)
-      }, 2000)
+        startContinuesScroll(isCancelled)
+      }, visiblePageReadInMS.value)
     }
   }
   requestId = window.requestAnimationFrame(loop)
