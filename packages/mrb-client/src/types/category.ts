@@ -1,9 +1,9 @@
 export interface Category {
-  id: number
+  id: number | string
   name: string
-  length: number
-  climb: number
-  controls: number
+  length?: number
+  climb?: number
+  controls?: number
   gender: 'M' | 'F' | 'X'
 }
 
