@@ -1,4 +1,4 @@
-import type { Category } from '@/types/category'
+import type { Category, RawRunner } from '@/types/category'
 
 export const classesTestData: Category[] = [
   {
@@ -50,3 +50,28 @@ export const classesTestData: Category[] = [
     gender: 'M',
   },
 ]
+
+const getRandomTime = () => {
+  const timeM = Math.floor(Math.random() * 35) + 35
+  const timeS = Math.floor(Math.random() * 60)
+  return { timeM, timeS }
+}
+
+export const createTestRunner = (gender?: string): RawRunner => ({
+  surname: 'Doe',
+  firstName: gender === 'F' ? 'Jane' : 'Joe',
+  si: '81234567',
+  club: 'Czech republic',
+  ...getRandomTime(),
+})
+
+export const createTestRunners = ({
+  gender,
+  count,
+}: {
+  gender?: string
+  count?: number
+}): RawRunner[] => {
+  const runnersCount = count || Math.floor(Math.random() * 20) + 10
+  return new Array(runnersCount).fill({}).map(() => createTestRunner(gender))
+}

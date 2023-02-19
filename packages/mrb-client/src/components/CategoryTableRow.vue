@@ -1,15 +1,7 @@
 <script setup lang="ts">
-export interface RunnerData {
-  rank: number
-  firstName: string
-  surname: string
-  si: string
-  club: string
-  time: string
-  loss: string
-}
+import type { RunnerWithStats } from '@/types/category'
 
-const props = defineProps<{ data: RunnerData; isEven: Boolean }>()
+const props = defineProps<{ data: RunnerWithStats; isEven: Boolean }>()
 
 const bgColor = props.isEven ? 'bg-even' : 'bg-white'
 </script>

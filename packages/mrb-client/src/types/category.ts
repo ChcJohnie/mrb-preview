@@ -7,10 +7,17 @@ export interface Category {
   gender: 'M' | 'F' | 'X'
 }
 
+export interface LSRunner {
+  name: string
+  club: string
+  result: string
+  status: number
+}
+
 export interface RawRunner {
   firstName: string
   surname: string
-  si: string
+  si?: string
   club: string
   timeM: number
   timeS: number
@@ -19,7 +26,7 @@ export interface RawRunner {
 export interface RunnerWithStats {
   firstName: string
   surname: string
-  si: string
+  si?: string
   club: string
   timeM: number
   timeS: number

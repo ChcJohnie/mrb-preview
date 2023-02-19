@@ -9,7 +9,7 @@ import CategoryTestTable from '@/components/CategoryTestTable.vue'
 import TableSettings from '@/components/TableSettings.vue'
 import { useTableSizingStore } from '@/stores/tableSizing'
 import type { Category } from '@/types/category'
-import { classesTestData } from '@/utils/testData'
+import { classesTestData, createTestRunners } from '@/utils/testData'
 
 const tableViewRef = ref<HTMLElement | null>(null)
 const tableSizing = useTableSizingStore()
@@ -80,6 +80,10 @@ useResizeObserver(tableViewRef, analyzeTableSizes)
       <CategoryTable
         v-for="category in eventClasses"
         :key="category.id"
+        :event-id="EVENT_ID"
+        :runners="
+          EVENT_ID ? undefined : createTestRunners({ gender: category.gender })
+        "
         :category="category"
         class="mb-4"
       />

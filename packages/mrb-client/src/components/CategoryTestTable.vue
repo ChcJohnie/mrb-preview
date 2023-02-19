@@ -24,6 +24,7 @@ function analyzeTestTable() {
   const tableElement = unref(testTableElement)
   if (!tableElement) return
   const [headerElement, runnerElement] = tableElement.children // ! Implementation detail, expect cat header as first child
+  if (!headerElement || !runnerElement) return
   tableSizing.headerHeight = headerElement.getBoundingClientRect().height
   tableSizing.lineHeight = runnerElement.getBoundingClientRect().height
   tableSizing.setAnalyzed(true)
@@ -52,6 +53,10 @@ const testRunners: RawRunner[] = [
 
 <template>
   <div class="flex-1 px-2">
-    <CategoryTable :category="testCategory" :runners="testRunners" />
+    <CategoryTable
+      :event-id="1"
+      :category="testCategory"
+      :runners="testRunners"
+    />
   </div>
 </template>
