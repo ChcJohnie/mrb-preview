@@ -55,22 +55,19 @@ function findLastVisibleTable() {
 function isFullyDisplayed(table: Ref<HTMLElement> | HTMLElement) {
   const tableElement = unref(table)
   const rect = tableElement.getBoundingClientRect()
-  const bottomMargin = rootFontSizePx
+  const bottomMargin = 16
   const tablePxRemaining = rect.bottom - columnRect.value.bottom
   return Math.floor(tablePxRemaining) <= bottomMargin
 }
 
-const STICKY_HEADER_REMS = 4.5
-const rootFontSize = window.getComputedStyle(document.documentElement).fontSize
-const rootFontSizePx = parseInt(rootFontSize.slice(0, -2))
-
 function scrollDownByHeight() {
   const wHeight = columnRect.value.height
   const lastTable = findLastVisibleTable()
+  // TODO Scroll height calc could be much better
   const heightSubtract =
     lastTable && isFullyDisplayed(lastTable)
       ? 0
-      : STICKY_HEADER_REMS * rootFontSizePx
+      : tableSizing.headerHeight + tableSizing.lineHeight * 2
   const height = wHeight - heightSubtract
   if (height) columnWrapper.value?.scrollBy({ top: height, behavior: 'smooth' })
   // TODO Lessen scroll y if for last newly visible table only heading will be visible
