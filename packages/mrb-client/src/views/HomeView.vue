@@ -1,5 +1,30 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
+import { useQuery } from '@tanstack/vue-query'
+import { isToday } from 'date-fns'
+
+import { fixEventJSONResponse } from '@/utils/liveResultat'
+import type { Event } from '@/types/event'
+
+const { data: eventList } = useQuery({
+  queryKey: ['eventList'],
+  queryFn: async () => {
+    const response = await fetch(
+      `https://liveresultat.orientering.se/api.php?method=getcompetitions`
+    )
+    if (!response.ok) {
+      throw new Error('Network response was not ok')
+    }
+    const jsonObject = await fixEventJSONResponse(response)
+    return jsonObject.competitions as Event[]
+  },
+})
+
+const todayEvents = computed(() => {
+  if (!eventList.value) return []
+  return eventList.value.filter((event) => isToday(new Date(event.date)))
+})
 </script>
 
 <template>
@@ -9,9 +34,21 @@ import { RouterLink } from 'vue-router'
 
       <nav>
         <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/table">Table</RouterLink>
+        <RouterLink to="/event/test">Table</RouterLink>
       </nav>
     </div>
   </header>
-  <main>There will be event selection page here in the future</main>
+  <main>
+    <div v-if="eventList" class="wrapper">
+      <h2>Choose event</h2>
+      <ul>
+        <li v-for="event in todayEvents" :key="event.id">
+          <RouterLink :to="{ name: 'event', params: { eventId: event.id } }">
+            {{ event.name }}
+          </RouterLink>
+        </li>
+      </ul>
+    </div>
+    <div v-else>Loading events</div>
+  </main>
 </template>

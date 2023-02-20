@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { useResizeObserver } from '@vueuse/core'
 import { useQuery } from '@tanstack/vue-query'
 
@@ -12,34 +13,38 @@ import TableSettings from '@/components/TableSettings.vue'
 import { useTableSizingStore } from '@/stores/tableSizing'
 import type { Category } from '@/types/category'
 import type { Event } from '@/types/event'
+import { fixEventJSONResponse } from '@/utils/liveResultat'
 import { classesTestData, createTestRunners } from '@/utils/testData'
 
+const route = useRoute()
+const eventId = computed(() =>
+  route.params.eventId === 'test' ? 0 : parseInt(route.params.eventId as string)
+)
 const tableViewRef = ref<HTMLElement | null>(null)
 const tableSizing = useTableSizingStore()
-const EVENT_ID = 25126
 
 const { data: eventData } = useQuery({
   queryKey: ['eventData'],
   queryFn: async () => {
-    if (!EVENT_ID)
+    if (!eventId.value)
       return { name: 'TEST EVENT', organizer: 'TEST CLUB' } as Event
     const response = await fetch(
-      `https://liveresultat.orientering.se/api.php?method=getcompetitioninfo&comp=${EVENT_ID}`
+      `https://liveresultat.orientering.se/api.php?method=getcompetitioninfo&comp=${eventId.value}`
     )
     if (!response.ok) {
       throw new Error('Network response was not ok')
     }
-    const eventData = (await response.json()) as Event
-    return eventData
+    const jsonObject = await fixEventJSONResponse(response)
+    return jsonObject as Event
   },
 })
 
 const { status: classesStatus, data: eventClasses } = useQuery({
   queryKey: ['eventClasses'],
   queryFn: async () => {
-    if (!EVENT_ID) return classesTestData
+    if (!eventId.value) return classesTestData
     const response = await fetch(
-      `https://liveresultat.orientering.se/api.php?method=getclasses&comp=${EVENT_ID}`
+      `https://liveresultat.orientering.se/api.php?method=getclasses&comp=${eventId.value}`
     )
     if (!response.ok) {
       throw new Error('Network response was not ok')
@@ -81,9 +86,9 @@ useResizeObserver(tableViewRef, analyzeTableSizes)
       <CategoryTable
         v-for="category in eventClasses"
         :key="category.id"
-        :event-id="EVENT_ID"
+        :event-id="eventId"
         :runners="
-          EVENT_ID ? undefined : createTestRunners({ gender: category.gender })
+          eventId ? undefined : createTestRunners({ gender: category.gender })
         "
         :category="category"
         class="mb-4"
