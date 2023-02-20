@@ -81,7 +81,7 @@ function scrollByPage() {
 function setupPageScroll() {
   const { pause, resume, isActive } = useIntervalFn(
     scrollByPage,
-    visiblePageReadInMS.value
+    visiblePageReadInMS
   )
   const removeIntervalWatch = watch(visiblePageReadInMS, (newVal) => {
     const isInterval = newVal !== 0
@@ -103,7 +103,6 @@ watch(
       activeScroll()
       activeScroll = null
     }
-    if (columnWrapper.value === null || columnContent.value === null) return
     if (type === 'none') return
     if (type === 'page') {
       activeScroll = setupPageScroll()
