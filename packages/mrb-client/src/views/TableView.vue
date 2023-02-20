@@ -22,6 +22,12 @@ const eventId = computed(() =>
 )
 const tableViewRef = ref<HTMLElement | null>(null)
 const tableSizing = useTableSizingStore()
+const isSettingsDisplayed = ref(false)
+function setSettingsDisplayed(status?: boolean) {
+  if (typeof status === 'undefined')
+    isSettingsDisplayed.value = !isSettingsDisplayed.value
+  else isSettingsDisplayed.value = status
+}
 
 const { data: eventData } = useQuery({
   queryKey: ['eventData'],
@@ -80,7 +86,11 @@ useResizeObserver(tableViewRef, analyzeTableSizes)
 </script>
 
 <template>
-  <table-header v-if="eventData" :event="eventData" />
+  <table-header
+    v-if="eventData"
+    :event="eventData"
+    @toggle-settings="setSettingsDisplayed"
+  />
   <div ref="tableViewRef" class="font-mrb grow flex overflow-hidden p-t3 pl-3">
     <ScrollColumn v-if="tableSizing.isAnalyzed && classesStatus === 'success'">
       <CategoryTable
@@ -96,6 +106,9 @@ useResizeObserver(tableViewRef, analyzeTableSizes)
     </ScrollColumn>
     <div v-else-if="classesStatus === 'loading'">Loading data</div>
     <CategoryTestTable v-else />
-    <TableSettings class="fixed bottom-6 right-0 z-3" />
+    <TableSettings
+      v-if="isSettingsDisplayed"
+      class="fixed inset-y-24 right-0 z-3"
+    />
   </div>
 </template>
