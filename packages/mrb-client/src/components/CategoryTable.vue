@@ -6,12 +6,14 @@ import TableHeader from './CategoryTableHeader.vue'
 import TableRow from './CategoryTableRow.vue'
 
 import { addScrollTableElementKey } from '@/types/providers'
+import { RunnerStatus } from '@/types/category'
 import type {
   Category,
   RawRunner,
   RunnerWithStats,
   LSRunner,
 } from '@/types/category'
+import { statusMap } from '@/utils/liveResultat'
 
 const props = defineProps<{
   eventId: number
@@ -44,12 +46,14 @@ function formatLSRunnersToRaw(runners: LSRunner[]): RawRunner[] {
     const timeMS = parseFloat(runner.result) * 10
     const timeM = Math.floor(timeMS / 60000)
     const timeS = Math.floor((timeMS - timeM * 60000) / 1000)
+    const status = statusMap[runner.status]
     return {
       surname: runner.name,
       firstName: '',
       club: runner.club,
       timeM,
       timeS,
+      status,
     }
   })
 }
@@ -62,15 +66,18 @@ const runnersFormatted = computed(() => {
   )
     return { firstRow: null, restRows: null }
   const runnersCopy = [...rawRunners.value]
-  runnersCopy.sort((a, b) => {
-    if (a.timeM !== b.timeM) return a.timeM - b.timeM
-    if (a.timeS !== b.timeS) return a.timeS - b.timeS
-    return 0
-  })
+  runnersCopy.sort(runnerSortFunction)
   const formatted = formatData(runnersCopy)
   const [firstRow, ...restRows] = formatted
   return { firstRow, restRows }
 })
+
+function runnerSortFunction(a: RawRunner, b: RawRunner) {
+  if (a.status !== b.status) return a.status - b.status
+  if (a.timeM !== b.timeM) return a.timeM - b.timeM
+  if (a.timeS !== b.timeS) return a.timeS - b.timeS
+  return 0
+}
 
 function formatData(data: RawRunner[]): RunnerWithStats[] {
   const firstItem = {
@@ -82,6 +89,7 @@ function formatData(data: RawRunner[]): RunnerWithStats[] {
   let compareTime = firstItem.time
   let currentRank = firstItem.rank
   const otherItems = data.slice(1).map((item, index) => {
+    if (item.status !== RunnerStatus.Ok) return item
     const itemTime = `${item.timeM}:${formatSeconds(item.timeS)}`
     const isDraw = compareTime === itemTime
     if (!isDraw) {

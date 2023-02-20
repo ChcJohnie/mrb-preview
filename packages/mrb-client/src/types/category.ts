@@ -14,6 +14,18 @@ export interface LSRunner {
   status: number
 }
 
+export enum RunnerStatus {
+  Ok = 1,
+  NotCompeting,
+  OverMaxTime,
+  DidNotFinish,
+  Mispunch,
+  Disqualified,
+  DidNotStart,
+  Running,
+  NotStarted,
+}
+
 export interface RawRunner {
   firstName: string
   surname: string
@@ -21,16 +33,11 @@ export interface RawRunner {
   club: string
   timeM: number
   timeS: number
+  status: RunnerStatus
 }
 
-export interface RunnerWithStats {
-  firstName: string
-  surname: string
-  si?: string
-  club: string
-  timeM: number
-  timeS: number
-  rank: number
-  time: string
-  loss: string
+export interface RunnerWithStats extends RawRunner {
+  rank?: number
+  time?: string
+  loss?: string
 }

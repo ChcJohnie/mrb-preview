@@ -20,6 +20,6 @@ const nowFormatted = computed(() =>
   >
     <span>{{ props.event.organizer }}</span>
     <span>{{ props.event.name }}</span>
-    <span>{{ nowFormatted }}</span>
+    <span class="tabular-nums">{{ nowFormatted }}</span>
   </h1>
 </template>

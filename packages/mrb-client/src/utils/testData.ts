@@ -1,3 +1,4 @@
+import { RunnerStatus } from '@/types/category'
 import type { Category, RawRunner } from '@/types/category'
 
 export const classesTestData: Category[] = [
@@ -63,6 +64,7 @@ export const createTestRunner = (gender?: string): RawRunner => ({
   si: '81234567',
   club: 'Czech republic',
   ...getRandomTime(),
+  status: RunnerStatus.Ok,
 })
 
 export const createTestRunners = ({
