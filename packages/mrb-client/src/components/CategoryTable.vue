@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, inject, onMounted, computed } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
+import { startOfToday } from 'date-fns'
 
 import TableHeader from './CategoryTableHeader.vue'
 import TableRow from './CategoryTableRow.vue'
@@ -14,6 +15,10 @@ import type {
   LSRunner,
 } from '@/types/category'
 import { statusMap } from '@/utils/liveResultat'
+import {
+  getMinutesSecondsFromMilliseconds,
+  formatMinutesSeconds,
+} from '@/utils/dateTime'
 
 const props = defineProps<{
   eventId: number
@@ -42,17 +47,21 @@ const { status, data: rawRunners } = useQuery({
 })
 
 function formatLSRunnersToRaw(runners: LSRunner[]): RawRunner[] {
+  const todayStartTimeStamp = startOfToday().valueOf()
   return runners.map((runner) => {
     const timeMS = parseFloat(runner.result) * 10
-    const timeM = Math.floor(timeMS / 60000)
-    const timeS = Math.floor((timeMS - timeM * 60000) / 1000)
+    const { minutes: timeM, seconds: timeS } =
+      getMinutesSecondsFromMilliseconds(timeMS)
     const status = statusMap[runner.status]
+    const startTimeMS = runner.start * 10
+    const startTime = todayStartTimeStamp + startTimeMS
     return {
       surname: runner.name,
       firstName: '',
       club: runner.club,
       timeM,
       timeS,
+      startTime,
       status,
     }
   })
@@ -83,14 +92,14 @@ function formatData(data: RawRunner[]): RunnerWithStats[] {
   const firstItem = {
     ...data[0],
     rank: 1,
-    time: `${data[0].timeM}:${formatSeconds(data[0].timeS)}`,
+    time: formatMinutesSeconds(data[0].timeM, data[0].timeS),
     loss: '',
   }
   let compareTime = firstItem.time
   let currentRank = firstItem.rank
   const otherItems = data.slice(1).map((item, index) => {
     if (item.status !== RunnerStatus.Ok) return item
-    const itemTime = `${item.timeM}:${formatSeconds(item.timeS)}`
+    const itemTime = formatMinutesSeconds(item.timeM, item.timeS)
     const isDraw = compareTime === itemTime
     if (!isDraw) {
       currentRank = index + 2
@@ -111,12 +120,8 @@ function calculateLoss(leadItem: RawRunner, compareItem: RawRunner) {
   const lossSeconds = compareItem.timeS - leadItem.timeS
   const lossMinutes = compareItem.timeM - leadItem.timeM
   if (lossSeconds === 0 && lossMinutes === 0) return ''
-  if (lossSeconds >= 0) return `${lossMinutes}:${formatSeconds(lossSeconds)}`
-  return `${lossMinutes - 1}:${formatSeconds(60 + lossSeconds)}`
-}
-
-function formatSeconds(seconds: number) {
-  return seconds >= 10 ? seconds.toString() : `0${seconds}`
+  if (lossSeconds >= 0) return formatMinutesSeconds(lossMinutes, lossSeconds)
+  return formatMinutesSeconds(lossMinutes - 1, 60 + lossSeconds)
 }
 
 onMounted(() => {

@@ -10,6 +10,7 @@ export interface Category {
 export interface LSRunner {
   name: string
   club: string
+  start: number
   result: string
   status: number
 }
@@ -34,6 +35,7 @@ export interface RawRunner {
   timeM: number
   timeS: number
   status: RunnerStatus
+  startTime?: number
 }
 
 export interface RunnerWithStats extends RawRunner {

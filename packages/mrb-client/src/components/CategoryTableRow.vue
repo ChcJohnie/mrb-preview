@@ -1,10 +1,33 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useNow } from '@vueuse/core'
+
 import { RunnerStatus } from '@/types/category'
 import type { RunnerWithStats } from '@/types/category'
+import {
+  getMinutesSecondsFromMilliseconds,
+  formatMinutesSeconds,
+} from '@/utils/dateTime'
 
 const props = defineProps<{ data: RunnerWithStats; isEven: Boolean }>()
 
 const bgColor = props.isEven ? 'bg-even' : 'bg-white'
+
+const startTimeFormatted = computed(() =>
+  new Intl.DateTimeFormat('default', {
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+  }).format(props.data.startTime)
+)
+
+const now = useNow()
+const timeRunning = computed(() => {
+  if (!props.data.startTime) return ''
+  const time = now.value.valueOf() - props.data.startTime
+  const { minutes, seconds } = getMinutesSecondsFromMilliseconds(time)
+  return formatMinutesSeconds(minutes, seconds)
+})
 </script>
 
 <template>
