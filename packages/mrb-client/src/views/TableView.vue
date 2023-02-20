@@ -3,12 +3,15 @@ import { ref } from 'vue'
 import { useResizeObserver } from '@vueuse/core'
 import { useQuery } from '@tanstack/vue-query'
 
+import TableHeader from '@/components/TableHeader.vue'
 import ScrollColumn from '@/components/ScrollColumn.vue'
 import CategoryTable from '@/components/CategoryTable.vue'
 import CategoryTestTable from '@/components/CategoryTestTable.vue'
 import TableSettings from '@/components/TableSettings.vue'
+
 import { useTableSizingStore } from '@/stores/tableSizing'
 import type { Category } from '@/types/category'
+import type { Event } from '@/types/event'
 import { classesTestData, createTestRunners } from '@/utils/testData'
 
 const tableViewRef = ref<HTMLElement | null>(null)
@@ -18,13 +21,16 @@ const EVENT_ID = 25126
 const { data: eventData } = useQuery({
   queryKey: ['eventData'],
   queryFn: async () => {
+    if (!EVENT_ID)
+      return { name: 'TEST EVENT', organizer: 'TEST CLUB' } as Event
     const response = await fetch(
       `https://liveresultat.orientering.se/api.php?method=getcompetitioninfo&comp=${EVENT_ID}`
     )
     if (!response.ok) {
       throw new Error('Network response was not ok')
     }
-    return response.json()
+    const eventData = (await response.json()) as Event
+    return eventData
   },
 })
 
@@ -69,13 +75,8 @@ useResizeObserver(tableViewRef, analyzeTableSizes)
 </script>
 
 <template>
-  <div ref="tableViewRef" class="font-mrb grow flex overflow-hidden">
-    <!-- <div v-if="!isLoading && !isError">
-      <span v-for="category in data" :key="category.id">{{
-        category.name
-      }}</span>
-    </div> -->
-
+  <table-header v-if="eventData" :event="eventData" />
+  <div ref="tableViewRef" class="font-mrb grow flex overflow-hidden p-t3 pl-3">
     <ScrollColumn v-if="tableSizing.isAnalyzed && classesStatus === 'success'">
       <CategoryTable
         v-for="category in eventClasses"

@@ -188,6 +188,6 @@ function scrollContinuously(isCancelled: Ref<Boolean>) {
 
 <template>
   <div class="flex-1 overflow-y-scroll" ref="columnWrapper">
-    <div ref="columnContent" class="px-2"><slot> </slot></div>
+    <div ref="columnContent"><slot></slot></div>
   </div>
 </template>

@@ -15,6 +15,7 @@ export default defineConfig({
       presets: [presetWind(), presetAttributify(), presetIcons()],
       theme: {
         colors: {
+          header: '#0B5351',
           male: '#00A9A5',
           female: '#B8336A',
           neutral: '#544E61',
