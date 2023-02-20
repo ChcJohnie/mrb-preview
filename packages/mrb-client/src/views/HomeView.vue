@@ -34,7 +34,7 @@ const todayEvents = computed(() => {
 
       <nav>
         <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/event/test">Table</RouterLink>
+        <RouterLink to="/event">Table</RouterLink>
       </nav>
     </div>
   </header>

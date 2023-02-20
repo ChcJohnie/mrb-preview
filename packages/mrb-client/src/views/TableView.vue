@@ -17,9 +17,7 @@ import { fixEventJSONResponse } from '@/utils/liveResultat'
 import { classesTestData, createTestRunners } from '@/utils/testData'
 
 const route = useRoute()
-const eventId = computed(() =>
-  route.params.eventId === 'test' ? 0 : parseInt(route.params.eventId as string)
-)
+const eventId = computed(() => parseInt(route.params.eventId as string))
 const tableViewRef = ref<HTMLElement | null>(null)
 const tableSizing = useTableSizingStore()
 const isSettingsDisplayed = ref(false)
