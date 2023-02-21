@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, inject, onMounted, computed } from 'vue'
+import { ref, inject, onMounted, computed, watchEffect } from 'vue'
+import { useElementVisibility } from '@vueuse/core'
 import { useQuery } from '@tanstack/vue-query'
 import { startOfToday } from 'date-fns'
 
@@ -30,6 +31,11 @@ const props = defineProps<{
 
 const tableRef = ref<HTMLElement | null>(null)
 const addScrollTable = inject(addScrollTableElementKey)
+const visibilityTarget = inject('TableVisibilityTarget', null)
+// TODO Adjust VueUse version to allow bottom margin so one page below fold is 'visible'
+const isElementVisible = useElementVisibility(tableRef, {
+  scrollTarget: visibilityTarget,
+})
 
 const { status, data: rawRunners } = useQuery({
   queryKey: ['runners', props.category.id],
@@ -197,6 +203,7 @@ onMounted(() => {
         :data="row"
         :key="index"
         :is-even="index % 2 === 0"
+        :is-visible="isElementVisible"
       >
       </TableUnfinishedRow>
     </div>

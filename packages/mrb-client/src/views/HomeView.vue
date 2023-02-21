@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/vue-query'
 import { isToday } from 'date-fns'
 
 import { fixEventJSONResponse } from '@/utils/liveResultat'
-import type { Event } from '@/types/event'
+import type { EventInfo } from '@/types/event'
 
 const { data: eventList } = useQuery({
   queryKey: ['eventList'],
@@ -17,7 +17,7 @@ const { data: eventList } = useQuery({
       throw new Error('Network response was not ok')
     }
     const jsonObject = await fixEventJSONResponse(response)
-    return jsonObject.competitions as Event[]
+    return jsonObject.competitions as EventInfo[]
   },
 })
 

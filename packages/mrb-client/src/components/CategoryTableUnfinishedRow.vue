@@ -9,7 +9,11 @@ import {
   formatMinutesSeconds,
 } from '@/utils/dateTime'
 
-const props = defineProps<{ data: RunnerWithStats; isEven: Boolean }>()
+const props = defineProps<{
+  data: RunnerWithStats
+  isEven: Boolean
+  isVisible: Boolean
+}>()
 
 const bgColor = props.isEven ? 'bg-even' : 'bg-white'
 const now = useNow()
@@ -46,10 +50,13 @@ const timeRunning = computed(() => {
     <span>{{ data.si }}</span>
     <span>{{ data.club }}</span>
     <!-- TODO tabular-nums not nice override, special monospace font? -->
-    <span class="text-right tabular-nums" v-if="isRunning"
+    <span class="text-right tabular-nums" v-if="isRunning && isVisible"
       >( {{ timeRunning }} )</span
     >
-    <span class="text-right tabular-nums" v-else>{{ startTimeFormatted }}</span>
+    <span class="text-right tabular-nums" v-else-if="!isRunning">{{
+      startTimeFormatted
+    }}</span>
+    <span v-else></span>
     <span></span>
   </div>
 </template>

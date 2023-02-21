@@ -13,6 +13,7 @@ const settingsStore = useSettingStore()
 const tableSizing = useTableSizingStore()
 
 const columnWrapper = ref<HTMLElement | null>(null)
+provide('TableVisibilityTarget', columnWrapper)
 const columnContent = ref<HTMLElement | null>(null)
 const columnRect = computed(() => {
   if (!columnWrapper.value) return { top: 0, height: 100, bottom: 100 } // Placeholder until columnWrapper is set
