@@ -1,21 +1,13 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useNow } from '@vueuse/core'
+import { ref } from 'vue'
+import { useTimeHelpers } from '@/composables/useTimeHelpers'
 
 import { useSettingStore } from '@/stores/settings'
 import type { Competition } from '@/types/competition'
 
 const props = defineProps<{ competition: Competition }>()
 const settingsStore = useSettingStore()
-
-const now = useNow()
-const nowFormatted = computed(() =>
-  new Intl.DateTimeFormat('default', {
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
-  }).format(now.value)
-)
+const { nowFormatted } = useTimeHelpers()
 
 const isToolbarDisplayed = ref(false)
 </script>

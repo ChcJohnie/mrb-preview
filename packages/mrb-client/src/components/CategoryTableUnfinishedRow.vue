@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useNow } from '@vueuse/core'
 
+import { useTimeHelpers } from '@/composables/useTimeHelpers'
 import { RunnerStatus } from '@/types/category'
 import type { RunnerWithStats } from '@/types/category'
 import {
@@ -16,7 +16,7 @@ const props = defineProps<{
 }>()
 
 const bgColor = props.isEven ? 'bg-even' : 'bg-white'
-const now = useNow()
+const { now, timeFormatter } = useTimeHelpers()
 
 const isRunning = computed(() =>
   props.data.startTime
@@ -25,11 +25,7 @@ const isRunning = computed(() =>
 )
 
 const startTimeFormatted = computed(() =>
-  new Intl.DateTimeFormat('default', {
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
-  }).format(props.data.startTime)
+  timeFormatter.format(props.data.startTime)
 )
 
 const timeRunning = computed(() => {
