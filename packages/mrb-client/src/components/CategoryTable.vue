@@ -15,14 +15,15 @@ import type {
   RunnerWithStats,
   LSRunner,
 } from '@/types/category'
-import { statusMap } from '@/utils/liveResultat'
+import type { EventInfo } from '@/types/event'
+import { statusMap, adjustStartTimeToCET } from '@/utils/liveResultat'
 import {
   getMinutesSecondsFromMilliseconds,
   formatMinutesSeconds,
 } from '@/utils/dateTime'
 
 const props = defineProps<{
-  eventId: number
+  event: EventInfo
   category: Category
   runners?: RawRunner[]
 }>()
@@ -35,7 +36,7 @@ const { status, data: rawRunners } = useQuery({
   queryFn: async () => {
     if (props.runners) return props.runners
     const response = await fetch(
-      `https://liveresultat.orientering.se/api.php?comp=${props.eventId}&method=getclassresults&unformattedTimes=true&class=${props.category.id}`
+      `https://liveresultat.orientering.se/api.php?comp=${props.event.id}&method=getclassresults&unformattedTimes=true&class=${props.category.id}`
     )
     if (!response.ok) {
       throw new Error('Network response was not ok')
@@ -55,7 +56,10 @@ function formatLSRunnersToRaw(runners: LSRunner[]): RawRunner[] {
       getMinutesSecondsFromMilliseconds(timeMS)
     const status = statusMap[runner.status]
     const startTimeMS = runner.start * 10
-    const startTime = todayStartTimeStamp + startTimeMS
+    const startTime = adjustStartTimeToCET(
+      todayStartTimeStamp + startTimeMS,
+      props.event.timediff
+    )
     return {
       surname: runner.name,
       firstName: '',

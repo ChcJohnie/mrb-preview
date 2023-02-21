@@ -12,7 +12,7 @@ import TableSettings from '@/components/TableSettings.vue'
 
 import { useTableSizingStore } from '@/stores/tableSizing'
 import type { Category } from '@/types/category'
-import type { Event } from '@/types/event'
+import type { EventInfo } from '@/types/event'
 import { fixEventJSONResponse } from '@/utils/liveResultat'
 import { classesTestData, createTestRunners } from '@/utils/testData'
 
@@ -31,7 +31,7 @@ const { data: eventData } = useQuery({
   queryKey: ['eventData'],
   queryFn: async () => {
     if (!eventId.value)
-      return { name: 'TEST EVENT', organizer: 'TEST CLUB' } as Event
+      return { name: 'TEST EVENT', organizer: 'TEST CLUB' } as EventInfo
     const response = await fetch(
       `https://liveresultat.orientering.se/api.php?method=getcompetitioninfo&comp=${eventId.value}`
     )
@@ -39,7 +39,7 @@ const { data: eventData } = useQuery({
       throw new Error('Network response was not ok')
     }
     const jsonObject = await fixEventJSONResponse(response)
-    return jsonObject as Event
+    return jsonObject as EventInfo
   },
 })
 
@@ -90,11 +90,13 @@ useResizeObserver(tableViewRef, analyzeTableSizes)
     @toggle-settings="setSettingsDisplayed"
   />
   <div ref="tableViewRef" class="font-mrb grow flex overflow-hidden p-t3 pl-3">
-    <ScrollColumn v-if="tableSizing.isAnalyzed && classesStatus === 'success'">
+    <ScrollColumn
+      v-if="tableSizing.isAnalyzed && classesStatus === 'success' && eventData"
+    >
       <CategoryTable
         v-for="category in eventClasses"
         :key="category.id"
-        :event-id="eventId"
+        :event="eventData"
         :runners="
           eventId ? undefined : createTestRunners({ gender: category.gender })
         "

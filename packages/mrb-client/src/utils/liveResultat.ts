@@ -20,3 +20,12 @@ export const statusMap: { [lsStatus: number]: RunnerStatus } = {
   10: RunnerStatus.NotStarted,
   11: RunnerStatus.DidNotStart,
 }
+
+export const adjustStartTimeToCET = (
+  startTime: number,
+  timeDiffHours: number
+) => {
+  const timeDiffMilliseconds = timeDiffHours * 60 * 60 * 1000
+  const startTimeCET = startTime - timeDiffMilliseconds
+  return startTimeCET
+}
