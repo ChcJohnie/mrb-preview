@@ -6,9 +6,14 @@ import CategoryTable from './CategoryTable.vue'
 
 import { useTableSizingStore } from '@/stores/tableSizing'
 
-import type { Category, RawRunner } from '@/types/category'
+import { RunnerStatus, type Category, type RawRunner } from '@/types/category'
 import { addScrollTableElementKey } from '@/types/providers'
 import type { AddScrollTableElementFn } from '@/types/providers'
+import type { EventInfo } from '@/types/event'
+
+defineProps<{
+  event: EventInfo
+}>()
 
 const tableSizing = useTableSizingStore()
 const testTableElement = ref<HTMLElement>()
@@ -47,6 +52,7 @@ const testRunners: RawRunner[] = [
     club: 'Test Club',
     timeM: 111,
     timeS: 11,
+    status: RunnerStatus.Ok,
   },
 ]
 </script>
@@ -54,6 +60,7 @@ const testRunners: RawRunner[] = [
 <template>
   <div class="flex-1 px-2">
     <CategoryTable
+      :event="event"
       :event-id="1"
       :category="testCategory"
       :runners="testRunners"

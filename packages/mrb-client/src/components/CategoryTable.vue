@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, inject, onMounted, computed, watchEffect } from 'vue'
+import { ref, inject, onMounted, computed } from 'vue'
 import { useElementVisibility } from '@vueuse/core'
 import { useQuery } from '@tanstack/vue-query'
 import { startOfToday } from 'date-fns'
@@ -37,21 +37,43 @@ const isElementVisible = useElementVisibility(tableRef, {
   scrollTarget: visibilityTarget,
 })
 
+const lastLoadHash = ref<string>()
 const { status, data: rawRunners } = useQuery({
   queryKey: ['runners', props.category.id],
   queryFn: async () => {
     if (props.runners) return props.runners
     const response = await fetch(
-      `https://liveresultat.orientering.se/api.php?comp=${props.event.id}&method=getclassresults&unformattedTimes=true&class=${props.category.id}`
+      `https://liveresultat.orientering.se/api.php?comp=${
+        props.event.id
+      }&method=getclassresults&unformattedTimes=true&class=${
+        props.category.id
+      }${lastLoadHash.value ? `&last_hash=${lastLoadHash.value}` : ''}`
     )
     if (!response.ok) {
       throw new Error('Network response was not ok')
     }
-    const { results } = (await response.json()) as {
-      results: LSRunner[]
+    const res = (await response.json()) as
+      | {
+          results: LSRunner[]
+          hash: string
+        }
+      | { status: 'NOT MODIFIED' }
+    /*
+      StructuralSharing should revert to old data when NOT MODIFIED is in response
+    */
+    if (!('results' in res)) {
+      return null
     }
-    return formatLSRunnersToRaw(results)
+    lastLoadHash.value = res.hash
+    return formatLSRunnersToRaw(res.results)
   },
+  structuralSharing: (oldData, newData) => {
+    if (!oldData) return newData
+    if (!newData) return oldData
+    return newData
+  },
+  enabled: isElementVisible,
+  refetchInterval: 15 * 1000,
 })
 
 function formatLSRunnersToRaw(runners: LSRunner[]): RawRunner[] {

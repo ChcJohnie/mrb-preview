@@ -104,8 +104,11 @@ useResizeObserver(tableViewRef, analyzeTableSizes)
         class="mb-4"
       />
     </ScrollColumn>
-    <div v-else-if="classesStatus === 'loading'">Loading data</div>
-    <CategoryTestTable v-else />
+    <CategoryTestTable
+      :event="eventData"
+      v-else-if="!tableSizing.isAnalyzed && eventData"
+    />
+    <div v-else>Loading data</div>
     <TableSettings
       v-if="isSettingsDisplayed"
       class="fixed inset-y-24 right-0 z-3"
