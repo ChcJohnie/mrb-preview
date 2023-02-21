@@ -5,10 +5,10 @@ import { useQuery } from '@tanstack/vue-query'
 import { isToday } from 'date-fns'
 
 import { fixEventJSONResponse } from '@/utils/liveResultat'
-import type { EventInfo } from '@/types/event'
+import type { Competition } from '@/types/competition'
 
-const { data: eventList } = useQuery({
-  queryKey: ['eventList'],
+const { data: competitionList } = useQuery({
+  queryKey: ['competitionList'],
   queryFn: async () => {
     const response = await fetch(
       `https://liveresultat.orientering.se/api.php?method=getcompetitions`
@@ -17,13 +17,15 @@ const { data: eventList } = useQuery({
       throw new Error('Network response was not ok')
     }
     const jsonObject = await fixEventJSONResponse(response)
-    return jsonObject.competitions as EventInfo[]
+    return jsonObject.competitions as Competition[]
   },
 })
 
-const todayEvents = computed(() => {
-  if (!eventList.value) return []
-  return eventList.value.filter((event) => isToday(new Date(event.date)))
+const todayCompetitions = computed(() => {
+  if (!competitionList.value) return []
+  return competitionList.value.filter((competition) =>
+    isToday(new Date(competition.date))
+  )
 })
 </script>
 
@@ -39,12 +41,17 @@ const todayEvents = computed(() => {
     </div>
   </header>
   <main>
-    <div v-if="eventList" class="wrapper">
+    <div v-if="competitionList" class="wrapper">
       <h2>Choose event</h2>
       <ul>
-        <li v-for="event in todayEvents" :key="event.id">
-          <RouterLink :to="{ name: 'event', params: { eventId: event.id } }">
-            {{ event.name }}
+        <li v-for="competition in todayCompetitions" :key="competition.id">
+          <RouterLink
+            :to="{
+              name: 'event',
+              params: { competitionId: competition.id },
+            }"
+          >
+            {{ competition.name }}
           </RouterLink>
         </li>
       </ul>

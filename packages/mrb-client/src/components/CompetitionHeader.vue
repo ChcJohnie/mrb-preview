@@ -3,9 +3,9 @@ import { computed, ref } from 'vue'
 import { useNow } from '@vueuse/core'
 
 import { useSettingStore } from '@/stores/settings'
-import type { EventInfo } from '@/types/event'
+import type { Competition } from '@/types/competition'
 
-const props = defineProps<{ event: EventInfo }>()
+const props = defineProps<{ competition: Competition }>()
 const settingsStore = useSettingStore()
 
 const now = useNow()
@@ -26,8 +26,8 @@ const isToolbarDisplayed = ref(false)
     @mouseenter="isToolbarDisplayed = true"
     @mouseleave="isToolbarDisplayed = false"
   >
-    <span>{{ props.event.organizer }}</span>
-    <span>{{ props.event.name }}</span>
+    <span>{{ props.competition.organizer }}</span>
+    <span>{{ props.competition.name }}</span>
     <span class="tabular-nums">{{ nowFormatted }}</span>
     <div v-if="isToolbarDisplayed" class="absolute right-3 z-2 bg-header">
       <RouterLink to="/">Home</RouterLink>

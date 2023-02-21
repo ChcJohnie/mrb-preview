@@ -1,4 +1,4 @@
-export interface EventInfo {
+export interface Competition {
   id: number
   name: string
   organizer: string

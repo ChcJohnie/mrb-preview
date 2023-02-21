@@ -9,10 +9,10 @@ import { useTableSizingStore } from '@/stores/tableSizing'
 import { RunnerStatus, type Category, type RawRunner } from '@/types/category'
 import { addScrollTableElementKey } from '@/types/providers'
 import type { AddScrollTableElementFn } from '@/types/providers'
-import type { EventInfo } from '@/types/event'
+import type { Competition } from '@/types/competition'
 
 defineProps<{
-  event: EventInfo
+  competition: Competition
 }>()
 
 const tableSizing = useTableSizingStore()
@@ -60,8 +60,8 @@ const testRunners: RawRunner[] = [
 <template>
   <div class="flex-1 px-2">
     <CategoryTable
-      :event="event"
-      :event-id="1"
+      :competition="competition"
+      :competition-id="1"
       :category="testCategory"
       :runners="testRunners"
     />

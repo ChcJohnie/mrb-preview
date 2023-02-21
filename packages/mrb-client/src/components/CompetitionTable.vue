@@ -4,57 +4,59 @@ import { useRoute } from 'vue-router'
 import { useResizeObserver } from '@vueuse/core'
 import { useQuery } from '@tanstack/vue-query'
 
-import EventHeader from '@/components/EventHeader.vue'
+import CompetitionHeader from '@/components/CompetitionHeader.vue'
 import ScrollColumn from '@/components/ScrollColumn.vue'
 import CategoryTable from '@/components/CategoryTable.vue'
 import CategoryTestTable from '@/components/CategoryTestTable.vue'
 
 import { useTableSizingStore } from '@/stores/tableSizing'
 import type { Category } from '@/types/category'
-import type { EventInfo } from '@/types/event'
+import type { Competition } from '@/types/competition'
 import { fixEventJSONResponse } from '@/utils/liveResultat'
 import { classesTestData, createTestRunners } from '@/utils/testData'
 
 const route = useRoute()
-const eventId = computed(() => parseInt(route.params.eventId as string))
+const competitionId = computed(() =>
+  parseInt(route.params.competitionId as string)
+)
 const tableViewRef = ref<HTMLElement | null>(null)
 const tableSizing = useTableSizingStore()
 
-const { data: eventData } = useQuery({
-  queryKey: ['eventData'],
+const { data: competitionData } = useQuery({
+  queryKey: ['competitionData'],
   queryFn: async () => {
-    if (!eventId.value)
-      return { name: 'TEST EVENT', organizer: 'TEST CLUB' } as EventInfo
+    if (!competitionId.value)
+      return { name: 'TEST EVENT', organizer: 'TEST CLUB' } as Competition
     const response = await fetch(
-      `https://liveresultat.orientering.se/api.php?method=getcompetitioninfo&comp=${eventId.value}`
+      `https://liveresultat.orientering.se/api.php?method=getcompetitioninfo&comp=${competitionId.value}`
     )
     if (!response.ok) {
       throw new Error('Network response was not ok')
     }
     const jsonObject = await fixEventJSONResponse(response)
-    return jsonObject as EventInfo
+    return jsonObject as Competition
   },
 })
 
-const { status: classesStatus, data: eventClasses } = useQuery({
-  queryKey: ['eventClasses'],
+const { status: categoriesStatus, data: competitionCategories } = useQuery({
+  queryKey: ['competitionClasses'],
   queryFn: async () => {
-    if (!eventId.value) return classesTestData
+    if (!competitionId.value) return classesTestData
     const response = await fetch(
-      `https://liveresultat.orientering.se/api.php?method=getclasses&comp=${eventId.value}`
+      `https://liveresultat.orientering.se/api.php?method=getclasses&comp=${competitionId.value}`
     )
     if (!response.ok) {
       throw new Error('Network response was not ok')
     }
-    const { classes } = (await response.json()) as {
+    const { classes: categories } = (await response.json()) as {
       classes: Array<{ className: string }>
     }
-    const formattedClasses: Category[] = classes.map((eventClass) => ({
-      id: eventClass.className,
-      name: eventClass.className,
-      gender: guessGender(eventClass.className),
+    const formatted: Category[] = categories.map((category) => ({
+      id: category.className,
+      name: category.className,
+      gender: guessGender(category.className),
     }))
-    return formattedClasses
+    return formatted
   },
 })
 
@@ -77,25 +79,31 @@ useResizeObserver(tableViewRef, analyzeTableSizes)
 </script>
 
 <template>
-  <EventHeader v-if="eventData" :event="eventData" />
+  <CompetitionHeader v-if="competitionData" :competition="competitionData" />
   <div ref="tableViewRef" class="font-mrb grow flex overflow-hidden p-t3 pl-3">
     <ScrollColumn
-      v-if="tableSizing.isAnalyzed && classesStatus === 'success' && eventData"
+      v-if="
+        tableSizing.isAnalyzed &&
+        categoriesStatus === 'success' &&
+        competitionData
+      "
     >
       <CategoryTable
-        v-for="category in eventClasses"
+        v-for="category in competitionCategories"
         :key="category.id"
-        :event="eventData"
+        :competition="competitionData"
         :runners="
-          eventId ? undefined : createTestRunners({ gender: category.gender })
+          competitionId
+            ? undefined
+            : createTestRunners({ gender: category.gender })
         "
         :category="category"
         class="mb-4"
       />
     </ScrollColumn>
     <CategoryTestTable
-      :event="eventData"
-      v-else-if="!tableSizing.isAnalyzed && eventData"
+      :competition="competitionData"
+      v-else-if="!tableSizing.isAnalyzed && competitionData"
     />
     <div v-else>Loading data</div>
   </div>
