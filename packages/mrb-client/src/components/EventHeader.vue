@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useNow } from '@vueuse/core'
-import type { Event } from '@/types/event'
+import type { EventInfo } from '@/types/event'
 
-const props = defineProps<{ event: Event }>()
+const props = defineProps<{ event: EventInfo }>()
 defineEmits(['toggleSettings'])
 
 const now = useNow()

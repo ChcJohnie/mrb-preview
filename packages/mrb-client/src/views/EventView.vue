@@ -4,11 +4,11 @@ import { useRoute } from 'vue-router'
 import { useResizeObserver } from '@vueuse/core'
 import { useQuery } from '@tanstack/vue-query'
 
-import TableHeader from '@/components/TableHeader.vue'
+import EventHeader from '@/components/EventHeader.vue'
 import ScrollColumn from '@/components/ScrollColumn.vue'
 import CategoryTable from '@/components/CategoryTable.vue'
 import CategoryTestTable from '@/components/CategoryTestTable.vue'
-import TableSettings from '@/components/TableSettings.vue'
+import EventSettings from '@/components/EventSettings.vue'
 
 import { useTableSizingStore } from '@/stores/tableSizing'
 import type { Category } from '@/types/category'
@@ -84,7 +84,7 @@ useResizeObserver(tableViewRef, analyzeTableSizes)
 </script>
 
 <template>
-  <table-header
+  <EventHeader
     v-if="eventData"
     :event="eventData"
     @toggle-settings="setSettingsDisplayed"
@@ -109,7 +109,7 @@ useResizeObserver(tableViewRef, analyzeTableSizes)
       v-else-if="!tableSizing.isAnalyzed && eventData"
     />
     <div v-else>Loading data</div>
-    <TableSettings
+    <EventSettings
       v-if="isSettingsDisplayed"
       class="fixed inset-y-24 right-0 z-3"
     />
