@@ -26,7 +26,6 @@ import {
 const props = defineProps<{
   competition: Competition
   category: Category
-  runners?: RawRunner[]
 }>()
 
 const tableRef = ref<HTMLElement | null>(null)
@@ -41,7 +40,7 @@ const lastLoadHash = ref<string>()
 const { status, data: rawRunners } = useQuery({
   queryKey: ['runners', props.category.id],
   queryFn: async () => {
-    if (props.runners) return props.runners
+    if (props.category.runners) return props.category.runners
     const response = await fetch(
       `https://liveresultat.orientering.se/api.php?comp=${
         props.competition.id

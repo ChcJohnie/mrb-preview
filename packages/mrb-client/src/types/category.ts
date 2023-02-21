@@ -5,6 +5,7 @@ export interface Category {
   climb?: number
   controls?: number
   gender: 'M' | 'F' | 'X'
+  runners?: RawRunner[]
 }
 
 export interface LSRunner {

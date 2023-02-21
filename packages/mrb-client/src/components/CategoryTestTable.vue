@@ -35,15 +35,6 @@ function analyzeTestTable() {
   tableSizing.setAnalyzed(true)
 }
 
-const testCategory: Category = {
-  id: 1,
-  name: 'TEST',
-  length: 11.1,
-  climb: 111,
-  controls: 11,
-  gender: 'X',
-}
-
 const testRunners: RawRunner[] = [
   {
     firstName: 'Test',
@@ -55,6 +46,16 @@ const testRunners: RawRunner[] = [
     status: RunnerStatus.Ok,
   },
 ]
+
+const testCategory: Category = {
+  id: 1,
+  name: 'TEST',
+  length: 11.1,
+  climb: 111,
+  controls: 11,
+  gender: 'X',
+  runners: testRunners,
+}
 </script>
 
 <template>
@@ -63,7 +64,6 @@ const testRunners: RawRunner[] = [
       :competition="competition"
       :competition-id="1"
       :category="testCategory"
-      :runners="testRunners"
     />
   </div>
 </template>

@@ -1,7 +1,7 @@
 import { RunnerStatus } from '@/types/category'
 import type { Category, RawRunner } from '@/types/category'
 
-export const classesTestData: Category[] = [
+export const createTestCategories = (): Category[] => [
   {
     id: 1,
     name: 'H21C',
@@ -9,6 +9,7 @@ export const classesTestData: Category[] = [
     climb: 255,
     controls: 20,
     gender: 'M',
+    runners: createTestRunners({ gender: 'M' }),
   },
   {
     id: 2,
@@ -17,6 +18,7 @@ export const classesTestData: Category[] = [
     climb: 150,
     controls: 16,
     gender: 'F',
+    runners: createTestRunners({ gender: 'F' }),
   },
   {
     id: 3,
@@ -25,6 +27,7 @@ export const classesTestData: Category[] = [
     climb: 255,
     controls: 20,
     gender: 'X',
+    runners: createTestRunners({ gender: 'M' }),
   },
   {
     id: 4,
@@ -33,6 +36,7 @@ export const classesTestData: Category[] = [
     climb: 255,
     controls: 20,
     gender: 'M',
+    runners: createTestRunners({ gender: 'M' }),
   },
   {
     id: 5,
@@ -41,6 +45,7 @@ export const classesTestData: Category[] = [
     climb: 255,
     controls: 20,
     gender: 'M',
+    runners: createTestRunners({ gender: 'M' }),
   },
   {
     id: 6,
@@ -49,6 +54,7 @@ export const classesTestData: Category[] = [
     climb: 255,
     controls: 20,
     gender: 'M',
+    runners: createTestRunners({ gender: 'M' }),
   },
 ]
 
