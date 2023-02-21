@@ -4,7 +4,8 @@ import { useQuery } from '@tanstack/vue-query'
 import { startOfToday } from 'date-fns'
 
 import TableHeader from './CategoryTableHeader.vue'
-import TableRow from './CategoryTableRow.vue'
+import TableFinishedRow from './CategoryTableFinishedRow.vue'
+import TableUnfinishedRow from './CategoryTableUnfinishedRow.vue'
 
 import { addScrollTableElementKey } from '@/types/providers'
 import { RunnerStatus } from '@/types/category'
@@ -67,53 +68,89 @@ function formatLSRunnersToRaw(runners: LSRunner[]): RawRunner[] {
   })
 }
 
-const runnersFormatted = computed(() => {
-  if (
-    status.value !== 'success' ||
-    !rawRunners.value ||
-    !rawRunners.value.length
+type ClassifyRunners = {
+  finished: RawRunner[]
+  unfinished: RawRunner[]
+}
+const runners = computed((): ClassifyRunners => {
+  if (status.value !== 'success' || !rawRunners.value)
+    return { finished: [], unfinished: [] }
+  return rawRunners.value.reduce(
+    (runners, runner) => {
+      if (
+        runner.status === RunnerStatus.NotStarted ||
+        runner.status === RunnerStatus.Running
+      ) {
+        runners.unfinished.push(runner)
+      } else {
+        runners.finished.push(runner)
+      }
+      return runners
+    },
+    { finished: [], unfinished: [] } as ClassifyRunners
   )
-    return { firstRow: null, restRows: null }
-  const runnersCopy = [...rawRunners.value]
-  runnersCopy.sort(runnerSortFunction)
-  const formatted = formatData(runnersCopy)
-  const [firstRow, ...restRows] = formatted
-  return { firstRow, restRows }
 })
 
-function runnerSortFunction(a: RawRunner, b: RawRunner) {
+type ClassifiedFinishedRunners = {
+  firstRow: RunnerWithStats | null
+  restRows: RunnerWithStats[]
+}
+const finishedRunners = computed(() => {
+  if (!runners.value.finished.length) return { firstRow: null, restRows: [] }
+  const runnersCopy = [...runners.value.finished]
+  runnersCopy.sort(finishedRunnerSortFunction)
+  const formatted = formatFinishedRunners(runnersCopy)
+  return formatted
+})
+
+function finishedRunnerSortFunction(a: RawRunner, b: RawRunner) {
   if (a.status !== b.status) return a.status - b.status
   if (a.timeM !== b.timeM) return a.timeM - b.timeM
   if (a.timeS !== b.timeS) return a.timeS - b.timeS
   return 0
 }
 
-function formatData(data: RawRunner[]): RunnerWithStats[] {
-  const firstItem = {
-    ...data[0],
+function formatFinishedRunners(data: RawRunner[]): ClassifiedFinishedRunners {
+  const firstRunner = data[0]
+  if (firstRunner.status !== RunnerStatus.Ok)
+    return { firstRow: null, restRows: data } // First runner after sort is not finished, nothing to format
+  const firstRow = {
+    ...firstRunner,
     rank: 1,
-    time: formatMinutesSeconds(data[0].timeM, data[0].timeS),
+    time: formatMinutesSeconds(firstRunner.timeM, firstRunner.timeS),
     loss: '',
   }
-  let compareTime = firstItem.time
-  let currentRank = firstItem.rank
-  const otherItems = data.slice(1).map((item, index) => {
-    if (item.status !== RunnerStatus.Ok) return item
-    const itemTime = formatMinutesSeconds(item.timeM, item.timeS)
+  let compareTime = firstRow.time
+  let currentRank = firstRow.rank
+  const restRows = data.slice(1).map((runner, index) => {
+    if (runner.status !== RunnerStatus.Ok) return runner // Runner is not finished, nothing to format
+    const itemTime = formatMinutesSeconds(runner.timeM, runner.timeS)
     const isDraw = compareTime === itemTime
     if (!isDraw) {
       currentRank = index + 2
       compareTime = itemTime
     }
     return {
-      ...item,
+      ...runner,
       rank: currentRank,
       time: itemTime,
-      loss: calculateLoss(firstItem, item),
+      loss: calculateLoss(firstRow, runner),
     }
   })
-  otherItems.unshift(firstItem)
-  return otherItems
+  return { firstRow, restRows }
+}
+
+const unfinishedRunners = computed(() => {
+  if (!runners.value.unfinished.length) return []
+  const runnersCopy = [...runners.value.unfinished]
+  runnersCopy.sort(unfinishedRunnerSortFunction)
+  return runnersCopy
+})
+
+function unfinishedRunnerSortFunction(a: RawRunner, b: RawRunner) {
+  if (a.startTime && b.startTime) return a.startTime - b.startTime
+  if (a.status !== b.status) return a.status - b.status
+  return a.surname < b.surname ? -1 : 1
 }
 
 function calculateLoss(leadItem: RawRunner, compareItem: RawRunner) {
@@ -134,22 +171,30 @@ onMounted(() => {
     <TableHeader class="p-3" :category="props.category" />
     <!-- TODO Add 2rem text class -->
     <div
-      v-if="status === 'success' && runnersFormatted.firstRow"
+      v-if="status === 'success' && rawRunners?.length"
       class="w-full text-3xl font-bold bg-white"
     >
-      <TableRow
-        :data="runnersFormatted.firstRow"
+      <TableFinishedRow
+        v-if="finishedRunners.firstRow"
+        :data="finishedRunners.firstRow"
         :is-even="false"
         class="sticky top-16"
       >
-      </TableRow>
-      <TableRow
-        v-for="(row, index) in runnersFormatted.restRows"
+      </TableFinishedRow>
+      <TableFinishedRow
+        v-for="(row, index) in finishedRunners.restRows"
         :data="row"
         :key="row.rank"
         :is-even="index % 2 === 0"
       >
-      </TableRow>
+      </TableFinishedRow>
+      <TableUnfinishedRow
+        v-for="(row, index) in unfinishedRunners"
+        :data="row"
+        :key="index"
+        :is-even="index % 2 === 0"
+      >
+      </TableUnfinishedRow>
     </div>
   </div>
 </template>
