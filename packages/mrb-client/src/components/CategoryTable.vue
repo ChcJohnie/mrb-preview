@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, inject, onMounted } from 'vue'
+import { ref, computed, inject, onMounted } from 'vue'
 import { useElementVisibility } from '@vueuse/core'
 
 import TableHeader from './CategoryTableHeader.vue'
@@ -35,6 +35,13 @@ const { status, athletes, areAvailable } = useAthletes({
   fetchEnabled: isElementVisible,
 })
 
+const athletesCount = computed(() => {
+  return {
+    finished: athletes.value.finished.length,
+    unfinished: athletes.value.unfinished.length,
+    full: athletes.value.finished.length + athletes.value.unfinished.length,
+  }
+})
 const finishedAthletes = useFinishedAthletes(athletes)
 const unfinishedAthletes = useUnfinishedAthletes(athletes)
 
@@ -45,7 +52,11 @@ onMounted(() => {
 
 <template>
   <div ref="tableRef">
-    <TableHeader class="p-3" :category="props.category" />
+    <TableHeader
+      class="p-3"
+      :category="props.category"
+      :athletes-count="athletesCount"
+    />
     <!-- TODO Add 2rem text class -->
     <div
       v-if="status === 'success' && areAvailable"
