@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useNow } from '@vueuse/core'
+
+import { useSettingStore } from '@/stores/settings'
 import type { EventInfo } from '@/types/event'
 
 const props = defineProps<{ event: EventInfo }>()
-defineEmits(['toggleSettings'])
+const settingsStore = useSettingStore()
 
 const now = useNow()
 const nowFormatted = computed(() =>
@@ -29,7 +31,10 @@ const isToolbarDisplayed = ref(false)
     <span class="tabular-nums">{{ nowFormatted }}</span>
     <div v-if="isToolbarDisplayed" class="absolute right-3 z-2 bg-header">
       <RouterLink to="/">Home</RouterLink>
-      <button @click="$emit('toggleSettings')" class="ml-3 i-mdi-cog"></button>
+      <button
+        @click="() => settingsStore.setSettingsDisplayed()"
+        class="ml-3 i-mdi-cog"
+      ></button>
     </div>
   </h1>
 </template>

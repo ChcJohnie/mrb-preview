@@ -5,6 +5,13 @@ import { defineStore } from 'pinia'
 type ScrollType = 'none' | 'continues' | 'page'
 
 export const useSettingStore = defineStore('settings', () => {
+  const areSettingsDisplayed = ref(false)
+  function setSettingsDisplayed(status?: boolean) {
+    if (typeof status === 'undefined')
+      areSettingsDisplayed.value = !areSettingsDisplayed.value
+    else areSettingsDisplayed.value = status
+  }
+
   const scrollType: Ref<ScrollType> = ref('page')
   const readLineTimeSeconds = ref(0.2)
   const readLineTimeMS = computed(() => readLineTimeSeconds.value * 1000)
@@ -12,5 +19,13 @@ export const useSettingStore = defineStore('settings', () => {
     scrollType.value = type
   }
 
-  return { scrollType, readLineTimeSeconds, readLineTimeMS, setScrollType }
+  return {
+    areSettingsDisplayed,
+    setSettingsDisplayed,
+
+    scrollType,
+    readLineTimeSeconds,
+    readLineTimeMS,
+    setScrollType,
+  }
 })
