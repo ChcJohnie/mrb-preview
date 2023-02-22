@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useQuery } from '@tanstack/vue-query'
-import { isToday } from 'date-fns'
+import { isToday, isFuture } from 'date-fns'
 
 import { fixEventJSONResponse } from '@/utils/liveResultat'
 import type { Competition } from '@/types/competition'
@@ -21,41 +21,207 @@ const { data: competitionList } = useQuery({
   },
 })
 
-const todayCompetitions = computed(() => {
-  if (!competitionList.value) return []
-  return competitionList.value.filter((competition) =>
-    isToday(new Date(competition.date))
+const competitionsByPeriod = computed(() => {
+  const baseObject: {
+    future: Competition[]
+    today: Competition[]
+    past: Competition[]
+  } = {
+    future: [],
+    today: [],
+    past: [],
+  }
+  if (!competitionList.value) return baseObject
+  const classifiedByPeriods = competitionList.value.reduce(
+    (filtered, competition) => {
+      const competitionDate = new Date(competition.date)
+      if (isToday(competitionDate)) filtered.today.push(competition)
+      else if (isFuture(competitionDate)) filtered.future.push(competition)
+      else filtered.past.push(competition)
+      return filtered
+    },
+    baseObject
   )
+  classifiedByPeriods.future.sort((a, b) => (a < b ? 1 : -1)) // Sort futures from nearest to latest
+  return classifiedByPeriods
+})
+
+const pagination = ref({
+  past: 5,
+  future: 5,
+})
+
+const paginate = (period: 'past' | 'future', full: boolean) => {
+  if (full) pagination.value[period] = competitionsByPeriod.value[period].length
+  else pagination.value[period] += 5
+}
+
+const competitionsPaginated = computed(() => {
+  const { past, future } = pagination.value
+  return {
+    past: competitionsByPeriod.value.past.slice(0, past),
+    future: competitionsByPeriod.value.future.slice(0, future),
+  }
 })
 </script>
 
 <template>
-  <header>
-    <div class="wrapper">
-      <h1>My result board</h1>
+  <div class="grid home-layout gap-y-10 p-10 font-mrb">
+    <header class="header text-center">
+      <h1 class="text-4xl font-bold">
+        <span class="text-header">My</span
+        ><span class="text-female">Result</span
+        ><span class="text-male">Board</span>
+      </h1>
+      <p class="text-xl capitalize">Technology Preview</p>
+      <p class="mt-6 text-3xl font-semibold">
+        Orienteering competitions result board powered by MRB
+      </p>
+    </header>
+    <main
+      class="competition-list w-140 justify-self-center lg:justify-self-end lg:pr-4 lg:border-r-3 lg:border-female"
+    >
+      <h2 class="text-2xl font-semibold uppercase text-header">
+        Competition list (LiveResultat)
+      </h2>
+      <div v-if="competitionList" class="my-4">
+        <section>
+          <h3 class="text-xl font-bold text-header">LIVE today</h3>
+          <ul>
+            <li
+              v-for="competition in competitionsByPeriod.today"
+              :key="competition.id"
+              class="py-1"
+            >
+              <RouterLink
+                class="text-lg hover:font-bold hover:underline"
+                :to="{
+                  name: 'event',
+                  params: { competitionId: competition.id },
+                }"
+              >
+                {{ competition.name }}
+              </RouterLink>
+            </li>
+          </ul>
+        </section>
 
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/event">Table</RouterLink>
-      </nav>
-    </div>
-  </header>
-  <main>
-    <div v-if="competitionList" class="wrapper">
-      <h2>Choose event</h2>
-      <ul>
-        <li v-for="competition in todayCompetitions" :key="competition.id">
-          <RouterLink
-            :to="{
-              name: 'event',
-              params: { competitionId: competition.id },
-            }"
+        <section class="my-4">
+          <h3 class="text-xl font-bold text-header">Upcoming</h3>
+          <ul>
+            <li
+              v-for="competition in competitionsPaginated.future"
+              :key="competition.id"
+              class="py-1"
+            >
+              <RouterLink
+                class="text-lg hover:font-bold hover:underline-dashed"
+                :to="{
+                  name: 'event',
+                  params: { competitionId: competition.id },
+                }"
+              >
+                ({{ competition.date }}) {{ competition.name }}
+              </RouterLink>
+            </li>
+          </ul>
+          <div
+            v-show="
+              competitionsByPeriod.future.length !==
+              competitionsPaginated.future.length
+            "
           >
-            {{ competition.name }}
-          </RouterLink>
-        </li>
-      </ul>
-    </div>
-    <div v-else>Loading events</div>
-  </main>
+            <button
+              class="text-male font-bold p-1 m-2 rounded outline outline-2 outline-male hover:font-bold hover:bg-slate-300"
+              @click="() => paginate('future', false)"
+            >
+              Show more
+            </button>
+            <button
+              class="text-male font-bold p-1 m-2 rounded outline outline-2 outline-male hover:font-bold hover:bg-slate-300"
+              @click="() => paginate('future', true)"
+            >
+              Show full
+            </button>
+          </div>
+        </section>
+
+        <section>
+          <h3 class="text-xl font-bold text-header">Past</h3>
+          <ul>
+            <li
+              v-for="competition in competitionsPaginated.past"
+              :key="competition.id"
+              class="py-1"
+            >
+              <RouterLink
+                class="text-lg hover:font-bold hover:underline-dashed"
+                :to="{
+                  name: 'event',
+                  params: { competitionId: competition.id },
+                }"
+              >
+                ({{ competition.date }}) {{ competition.name }}
+              </RouterLink>
+            </li>
+          </ul>
+          <div
+            v-show="
+              competitionsByPeriod.past.length !==
+              competitionsPaginated.past.length
+            "
+          >
+            <button
+              class="text-male font-bold p-1 m-2 rounded outline outline-2 outline-male hover:font-bold hover:bg-slate-300"
+              @click="() => paginate('past', false)"
+            >
+              Show more
+            </button>
+            <button
+              class="text-male font-bold p-1 m-2 rounded outline outline-2 outline-male hover:font-bold hover:bg-slate-300"
+              @click="() => paginate('past', true)"
+            >
+              Show full
+            </button>
+          </div>
+        </section>
+      </div>
+      <div v-else>Loading events</div>
+    </main>
+    <section class="about lg:pl-4">ABOUT</section>
+    <footer class="footer">FOOTER</footer>
+  </div>
 </template>
+
+<style scoped>
+.header {
+  grid-area: header;
+}
+.competition-list {
+  grid-area: main;
+}
+.about {
+  grid-area: about;
+}
+.footer {
+  grid-area: footer;
+}
+
+.home-layout {
+  grid-template-areas:
+    'header'
+    'main'
+    'about'
+    'footer';
+}
+
+@media (min-width: 1024px) {
+  .home-layout {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      'header   header'
+      'main     about'
+      'footer   footer';
+  }
+}
+</style>
