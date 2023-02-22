@@ -66,7 +66,7 @@ onMounted(() => {
         v-if="finishedAthletes.firstRow"
         :data="finishedAthletes.firstRow"
         :is-even="false"
-        class="sticky top-16"
+        class="sticky top-16 border-b-2 border-gray-600 border-dashed"
       >
       </TableFinishedRow>
       <TableFinishedRow
@@ -82,6 +82,7 @@ onMounted(() => {
         :key="index"
         :is-even="index % 2 === 0"
         :is-visible="isElementVisible"
+        class="border-t-2 border-gray-600 border-dashed"
       >
       </TableUnfinishedRow>
     </div>
