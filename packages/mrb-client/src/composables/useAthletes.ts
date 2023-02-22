@@ -1,20 +1,10 @@
-import { ref, computed, type Ref } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
-import { startOfToday } from 'date-fns'
+import { computed, inject, type Ref } from 'vue'
 
+import { useDataProviderKey } from '@/types/providers'
 import { RunnerStatus } from '@/types/category'
-import type {
-  Category,
-  RawRunner,
-  LSRunner,
-  RunnerWithStats,
-} from '@/types/category'
+import type { Category, RawRunner, RunnerWithStats } from '@/types/category'
 import type { Competition } from '@/types/competition'
-import { statusMap, adjustStartTimeToCET } from '@/utils/liveResultat'
-import {
-  getMinutesSecondsFromMilliseconds,
-  formatMinutesSeconds,
-} from '@/utils/dateTime'
+import { formatMinutesSeconds } from '@/utils/dateTime'
 
 type ClassifyRunners = {
   finished: RawRunner[]
@@ -35,47 +25,21 @@ export function useAthletes({
   category: Category
   fetchEnabled?: Ref<boolean>
 }) {
-  const lastHash = ref<string>()
-  const enabled = computed(() =>
-    typeof fetchEnabled === 'undefined' ? true : fetchEnabled.value
-  )
-  const { status, data: rawRunners } = useQuery({
-    queryKey: ['runners', category.id],
-    queryFn: async () => {
-      if (category.runners) return category.runners
-      const response = await fetch(
-        `https://liveresultat.orientering.se/api.php?comp=${
-          competition.id
-        }&method=getclassresults&unformattedTimes=true&class=${category.id}${
-          lastHash.value ? `&last_hash=${lastHash.value}` : ''
-        }`
-      )
-      if (!response.ok) {
-        throw new Error('Network response was not ok')
+  const useDataProvider = inject(useDataProviderKey)
+  if (!useDataProvider) throw new Error('No data provider found')
+  const { getAthletesLoader } = useDataProvider()
+
+  /* Runners can be passed with category in test table context */
+  const { rawRunners, status } = category.runners
+    ? {
+        rawRunners: computed(() => category.runners),
+        status: computed(() => 'success'),
       }
-      const res = (await response.json()) as
-        | {
-            results: LSRunner[]
-            hash: string
-          }
-        | { status: 'NOT MODIFIED' }
-      /*
-      StructuralSharing should revert to old data when NOT MODIFIED is in response
-    */
-      if (!('results' in res)) {
-        return null
-      }
-      lastHash.value = res.hash
-      return formatLSRunnersToRaw(res.results, competition)
-    },
-    structuralSharing: (oldData, newData) => {
-      if (!oldData) return newData
-      if (!newData) return oldData
-      return newData
-    },
-    enabled,
-    refetchInterval: 15 * 1000,
-  })
+    : getAthletesLoader({
+        category,
+        competition,
+        fetchEnabled,
+      })
 
   const athletes = computed((): ClassifyRunners => {
     if (status.value !== 'success' || !rawRunners.value)
@@ -102,33 +66,6 @@ export function useAthletes({
   )
 
   return { status, athletes, areAvailable }
-}
-
-function formatLSRunnersToRaw(
-  runners: LSRunner[],
-  competition: Competition
-): RawRunner[] {
-  const todayStartTimeStamp = startOfToday().valueOf()
-  return runners.map((runner) => {
-    const timeMS = parseFloat(runner.result) * 10
-    const { minutes: timeM, seconds: timeS } =
-      getMinutesSecondsFromMilliseconds(timeMS)
-    const status = statusMap[runner.status]
-    const startTimeMS = runner.start * 10
-    const startTime = adjustStartTimeToCET(
-      todayStartTimeStamp + startTimeMS,
-      competition.timediff
-    )
-    return {
-      surname: runner.name,
-      firstName: '',
-      club: runner.club,
-      timeM,
-      timeS,
-      startTime,
-      status,
-    }
-  })
 }
 
 export function useFinishedAthletes(athletes: Ref<ClassifyRunners>) {

@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, toRefs } from 'vue'
 import { useResizeObserver } from '@vueuse/core'
 
 import CompetitionHeader from '@/components/CompetitionHeader.vue'
@@ -11,10 +10,10 @@ import CategoryTestTable from '@/components/CategoryTestTable.vue'
 import { useCompetition } from '@/composables/useCompetition'
 import { useTableSizingStore } from '@/stores/tableSizing'
 
-const route = useRoute()
-const competitionId = computed(() =>
-  parseInt(route.params.competitionId as string)
-)
+const props = defineProps<{
+  competitionId: number
+}>()
+const { competitionId } = toRefs(props)
 const { competition, status } = useCompetition(competitionId)
 
 const tableViewRef = ref<HTMLElement | null>(null)
