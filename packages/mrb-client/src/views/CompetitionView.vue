@@ -22,11 +22,13 @@ const settingsStore = useSettingStore()
 </script>
 
 <template>
-  <DataProvider :provider="dataProvider">
-    <CompetitionTable :competition-id="competitionId" />
-  </DataProvider>
-  <CompetitionSettings
-    v-if="settingsStore.areSettingsDisplayed"
-    class="fixed inset-y-24 right-0 z-3"
-  />
+  <div class="w-screen h-screen overflow-hidden flex flex-col">
+    <DataProvider :provider="dataProvider">
+      <CompetitionTable :competition-id="competitionId" />
+    </DataProvider>
+    <CompetitionSettings
+      v-if="settingsStore.areSettingsDisplayed"
+      class="fixed inset-y-24 right-0 z-3"
+    />
+  </div>
 </template>
