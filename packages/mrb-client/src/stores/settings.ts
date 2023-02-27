@@ -1,5 +1,4 @@
 import { ref, computed } from 'vue'
-import type { Ref } from 'vue'
 import { defineStore } from 'pinia'
 
 type ScrollType = 'none' | 'continues' | 'page'
@@ -12,7 +11,7 @@ export const useSettingStore = defineStore('settings', () => {
     else areSettingsDisplayed.value = status
   }
 
-  const scrollType: Ref<ScrollType> = ref('page')
+  const scrollType = ref<ScrollType>('page')
   const readLineTimeSeconds = ref(import.meta.env.PROD ? 1 : 0.2)
   const readLineTimeMS = computed(() => readLineTimeSeconds.value * 1000)
   function setScrollType(type: ScrollType) {
@@ -20,6 +19,13 @@ export const useSettingStore = defineStore('settings', () => {
   }
 
   const showUnfinishedRunners = ref(true)
+
+  const availableCategories = ref<string[]>([])
+  const selectedCategories = ref<string[]>([])
+  const setAvailableCategories = (categories: string[]) => {
+    availableCategories.value = categories
+    selectedCategories.value = categories
+  }
 
   return {
     areSettingsDisplayed,
@@ -31,5 +37,8 @@ export const useSettingStore = defineStore('settings', () => {
     setScrollType,
 
     showUnfinishedRunners,
+    availableCategories,
+    selectedCategories,
+    setAvailableCategories,
   }
 })

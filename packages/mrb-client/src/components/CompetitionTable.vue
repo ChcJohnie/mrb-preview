@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, toRefs } from 'vue'
+import { ref, computed, watchEffect, toRefs } from 'vue'
 import { useResizeObserver } from '@vueuse/core'
 
 import CompetitionHeader from '@/components/CompetitionHeader.vue'
@@ -9,12 +9,29 @@ import CategoryTestTable from '@/components/CategoryTestTable.vue'
 
 import { useCompetition } from '@/composables/useCompetition'
 import { useTableSizingStore } from '@/stores/tableSizing'
+import { useSettingStore } from '@/stores/settings'
 
 const props = defineProps<{
   competitionId: number
 }>()
+const settingStore = useSettingStore()
 const { competitionId } = toRefs(props)
 const { competition, status } = useCompetition(competitionId)
+
+const availableCategories = computed(() => {
+  if (!competition.value) return []
+  return competition.value.categories.map((category) => category.name)
+})
+watchEffect(() =>
+  settingStore.setAvailableCategories(availableCategories.value)
+)
+
+const categoriesForDisplay = computed(() => {
+  if (!competition.value) return []
+  return competition.value.categories.filter((category) =>
+    settingStore.selectedCategories.includes(category.name)
+  )
+})
 
 const tableViewRef = ref<HTMLElement | null>(null)
 const tableSizing = useTableSizingStore()
@@ -37,7 +54,7 @@ useResizeObserver(tableViewRef, analyzeTableSizes)
       v-if="tableSizing.isAnalyzed && status === 'success' && competition"
     >
       <CategoryTable
-        v-for="category in competition.categories"
+        v-for="category in categoriesForDisplay"
         :key="category.id"
         :competition="competition"
         :category="category"
