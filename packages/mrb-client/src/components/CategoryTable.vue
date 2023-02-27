@@ -11,6 +11,7 @@ import {
   useUnfinishedAthletes,
   useFinishedAthletes,
 } from '@/composables/useAthletes'
+import { useSettingStore } from '@/stores/settings'
 
 import { addScrollTableElementKey } from '@/types/providers'
 import type { Category } from '@/types/category'
@@ -20,6 +21,8 @@ const props = defineProps<{
   competition: Competition
   category: Category
 }>()
+
+const settingsStore = useSettingStore()
 
 const tableRef = ref<HTMLElement | null>(null)
 const addScrollTable = inject(addScrollTableElementKey)
@@ -76,15 +79,17 @@ onMounted(() => {
         :is-even="index % 2 === 0"
       >
       </TableFinishedRow>
-      <TableUnfinishedRow
-        v-for="(row, index) in unfinishedAthletes"
-        :data="row"
-        :key="index"
-        :is-even="index % 2 === 0"
-        :is-visible="isElementVisible"
-        class="border-t-2 border-gray-600 border-dashed"
-      >
-      </TableUnfinishedRow>
+      <template v-if="settingsStore.showUnfinishedRunners">
+        <TableUnfinishedRow
+          v-for="(row, index) in unfinishedAthletes"
+          :data="row"
+          :key="index"
+          :is-even="index % 2 === 0"
+          :is-visible="isElementVisible"
+          class="border-t-2 border-gray-600 border-dashed"
+        >
+        </TableUnfinishedRow>
+      </template>
     </div>
   </div>
 </template>

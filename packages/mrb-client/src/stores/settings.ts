@@ -19,6 +19,8 @@ export const useSettingStore = defineStore('settings', () => {
     scrollType.value = type
   }
 
+  const showUnfinishedRunners = ref(true)
+
   return {
     areSettingsDisplayed,
     setSettingsDisplayed,
@@ -27,5 +29,7 @@ export const useSettingStore = defineStore('settings', () => {
     readLineTimeSeconds,
     readLineTimeMS,
     setScrollType,
+
+    showUnfinishedRunners,
   }
 })
