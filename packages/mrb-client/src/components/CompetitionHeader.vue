@@ -18,10 +18,11 @@ const isToolbarDisplayed = ref(false)
     @mouseenter="isToolbarDisplayed = true"
     @mouseleave="isToolbarDisplayed = false"
   >
-    <span>{{ props.competition.organizer }}</span>
-    <span>{{ props.competition.name }}</span>
+    <!-- <span>{{ props.competition.organizer }}</span> -->
     <span class="tabular-nums">{{ nowFormatted }}</span>
-    <div v-if="isToolbarDisplayed" class="absolute right-3 z-2 bg-header">
+    <span>{{ props.competition.name }}</span>
+    <span></span>
+    <div class="absolute right-3 z-2 bg-header">
       <RouterLink to="/">Home</RouterLink>
       <button
         @click="() => settingsStore.setSettingsDisplayed()"
