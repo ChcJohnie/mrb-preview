@@ -19,12 +19,15 @@ const isToolbarDisplayed = ref(false)
     @mouseleave="isToolbarDisplayed = false"
   >
     <!-- <span>{{ props.competition.organizer }}</span> -->
-    <span class="tabular-nums">{{ nowFormatted }}</span>
+    <span data-test="current-time" class="tabular-nums">{{
+      nowFormatted
+    }}</span>
     <span>{{ props.competition.name }}</span>
     <span></span>
     <div class="absolute right-3 z-2 bg-header">
-      <RouterLink to="/">Home</RouterLink>
+      <RouterLink data-test="home-button" to="/">Home</RouterLink>
       <button
+        data-test="settings-button"
         @click="() => settingsStore.setSettingsDisplayed()"
         class="ml-3 i-mdi-cog"
       ></button>
