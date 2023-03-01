@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils'
+import { render } from '@testing-library/vue'
 
 import CategoryTableFinishedRow from '../CategoryTableFinishedRow.vue'
 import type { RunnerWithStats } from '@/types/category'
@@ -18,25 +18,24 @@ const TEST_RUNNER: RunnerWithStats = {
 
 describe('CategoryTableHeader', () => {
   it('renders properly', async () => {
-    const wrapper = mount(CategoryTableFinishedRow, {
+    const { container, getByText } = render(CategoryTableFinishedRow, {
       props: { isEven: false, data: TEST_RUNNER },
     })
 
-    expect(wrapper.text()).toContain(TEST_RUNNER.rank + '.')
-    expect(wrapper.text()).toContain(TEST_RUNNER.surname)
-    expect(wrapper.text()).toContain(TEST_RUNNER.club)
-    expect(wrapper.text()).toContain(TEST_RUNNER.time)
-    expect(wrapper.text()).toContain('+ ' + TEST_RUNNER.loss)
-
-    expect(wrapper.classes()).not.toContain('bg-even')
+    getByText(TEST_RUNNER.rank + '.')
+    getByText(TEST_RUNNER.surname)
+    getByText(TEST_RUNNER.club)
+    getByText(TEST_RUNNER.time!)
+    getByText('+ ' + TEST_RUNNER.loss)
+    expect(container.firstChild).toHaveClass('bg-white')
+    expect(container.firstChild).not.toHaveClass('bg-even')
   })
 
   it('renders properly for even rows', async () => {
-    const wrapper = mount(CategoryTableFinishedRow, {
+    const { container } = render(CategoryTableFinishedRow, {
       props: { isEven: true, data: TEST_RUNNER },
     })
-
-    expect(wrapper.classes()).toContain('bg-even')
+    expect(container.firstChild).toHaveClass('bg-even')
   })
 
   it('renders properly for runners with no loss', async () => {
@@ -45,11 +44,10 @@ describe('CategoryTableHeader', () => {
       loss: '',
     }
 
-    const wrapper = mount(CategoryTableFinishedRow, {
+    const { queryByText } = render(CategoryTableFinishedRow, {
       props: { isEven: false, data: runner },
     })
-
-    expect(wrapper.text()).not.toContain('+')
+    expect(queryByText('+ ' + TEST_RUNNER.loss)).toBeFalsy()
   })
 
   it('renders properly for not ok runner', async () => {
@@ -59,12 +57,11 @@ describe('CategoryTableHeader', () => {
       rank: 0,
     }
 
-    const wrapper = mount(CategoryTableFinishedRow, {
+    const { getByText } = render(CategoryTableFinishedRow, {
       props: { isEven: false, data: runner },
     })
-
-    expect(wrapper.text()).not.toContain(runner.rank + '.')
-    expect(wrapper.text()).toContain(RunnerStatus[runner.status])
-    expect(wrapper.text()).not.toContain(runner.time)
+    expect(() => getByText(runner.rank + '.')).toThrow()
+    getByText(RunnerStatus[runner.status])
+    expect(() => getByText(runner.time!)).toThrow()
   })
 })

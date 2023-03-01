@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils'
+import { render } from '@testing-library/vue'
 
 import CategoryTableHeader from '../CategoryTableHeader.vue'
 import type { Category } from '@/types/category'
@@ -24,33 +24,36 @@ describe('CategoryTableHeader', () => {
       controls: 21,
     }
 
-    const wrapper = mount(CategoryTableHeader, {
+    const { getByText, rerender } = render(CategoryTableHeader, {
       props: { category: TEST_CATEGORY, athletesCount: TEST_COUNTS },
     })
 
-    expect(wrapper.text()).toContain(TEST_CATEGORY.name)
-    expect(wrapper.text()).toContain(TEST_COUNTS.finished)
-    expect(wrapper.text()).toContain(TEST_COUNTS.full)
-    expect(wrapper.text()).not.toContain('km')
-    expect(wrapper.text()).not.toContain(categoryWithDetails.controls)
+    getByText(TEST_CATEGORY.name)
+    getByText(`${TEST_COUNTS.finished} / ${TEST_COUNTS.full}`)
+    expect(() => getByText('km', { exact: false })).toThrow()
+    expect(() =>
+      getByText(categoryWithDetails.controls!, { exact: false })
+    ).toThrow()
 
-    await wrapper.setProps({ category: categoryWithDetails })
-    expect(wrapper.text()).toContain('km')
-    expect(wrapper.text()).toContain(categoryWithDetails.controls)
+    await rerender({ category: categoryWithDetails })
+    getByText('km', { exact: false })
+    getByText(categoryWithDetails.controls!, { exact: false })
   })
 
   it('sets element background based on category gender', async () => {
-    const wrapper = mount(CategoryTableHeader, {
+    const { container, rerender } = render(CategoryTableHeader, {
       props: { category: TEST_CATEGORY, athletesCount: TEST_COUNTS },
     })
 
-    expect(wrapper.classes()).toContain('bg-neutral')
+    expect(container.firstChild).toHaveClass('bg-neutral')
+    expect(container.firstChild).not.toHaveClass('bg-female')
 
     const womenCategory: Category = {
       ...TEST_CATEGORY,
       gender: 'F',
     }
-    await wrapper.setProps({ category: womenCategory })
-    expect(wrapper.classes()).toContain('bg-female')
+    await rerender({ category: womenCategory })
+    expect(container.firstChild).not.toHaveClass('bg-neutral')
+    expect(container.firstChild).toHaveClass('bg-female')
   })
 })
