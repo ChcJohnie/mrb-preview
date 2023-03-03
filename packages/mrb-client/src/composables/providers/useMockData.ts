@@ -6,7 +6,7 @@ import type { Category } from '@/types/category'
 
 type QueryStatus = 'success' | 'loading' | 'error'
 
-export function useTestMocks() {
+export function useMockData() {
   const getCompetitionLoader = (competitionId: Ref<number>) => {
     const competitionObject: Competition = {
       id: competitionId.value,

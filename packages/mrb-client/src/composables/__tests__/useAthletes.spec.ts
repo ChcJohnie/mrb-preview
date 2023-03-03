@@ -8,7 +8,7 @@ import {
   useUnfinishedAthletes,
 } from '../useAthletes'
 import type { ClassifyRunners } from '../useAthletes'
-import { useTestMocks } from '../providers/useMocks'
+import { useMockData } from '../providers/useMockData'
 import { useDataProviderKey } from '@/types/providers'
 import type { Competition } from '@/types/competition'
 import { type RawRunner, RunnerStatus } from '@/types/category'
@@ -72,7 +72,7 @@ describe('useAthletes', () => {
       render(getTestComponent([]), {
         global: {
           provide: {
-            [useDataProviderKey as symbol]: useTestMocks,
+            [useDataProviderKey as symbol]: useMockData,
           },
         },
       })
@@ -88,7 +88,7 @@ describe('useAthletes', () => {
       render(getTestComponent(TestAthletes), {
         global: {
           provide: {
-            [useDataProviderKey as symbol]: useTestMocks,
+            [useDataProviderKey as symbol]: useMockData,
           },
         },
       })
@@ -110,7 +110,7 @@ describe('useAthletes', () => {
       render(getTestComponent(TestAthletes), {
         global: {
           provide: {
-            [useDataProviderKey as symbol]: useTestMocks,
+            [useDataProviderKey as symbol]: useMockData,
           },
         },
       })
@@ -149,7 +149,7 @@ describe('useAthletes', () => {
       render(getTestComponent(testRunners), {
         global: {
           provide: {
-            [useDataProviderKey as symbol]: useTestMocks,
+            [useDataProviderKey as symbol]: useMockData,
           },
         },
       })

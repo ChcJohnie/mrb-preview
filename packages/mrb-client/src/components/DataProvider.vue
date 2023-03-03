@@ -2,7 +2,7 @@
 import { provide } from 'vue'
 
 import { useLiveResultat } from '@/composables/providers/useLiveResultat'
-import { useTestMocks } from '@/composables/providers/useMocks'
+import { useMockData } from '@/composables/providers/useMockData'
 
 import { useDataProviderKey, type DataProviderSet } from '@/types/providers'
 
@@ -12,7 +12,7 @@ const props = defineProps<{
 
 const providerList: { [providerName: string]: DataProviderSet } = {
   liveResultat: useLiveResultat,
-  test: useTestMocks,
+  test: useMockData,
 }
 const useProvider = providerList[props.provider]
 
