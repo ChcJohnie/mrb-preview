@@ -1,4 +1,4 @@
-import { ref, computed, type Ref } from 'vue'
+import { ref, computed, watch, type Ref } from 'vue'
 
 import { createTestCategories } from '@/utils/testData'
 import type { Competition } from '@/types/competition'
@@ -6,7 +6,7 @@ import type { Category } from '@/types/category'
 
 type QueryStatus = 'success' | 'loading' | 'error'
 
-export function useTestMocks() {
+export function useMockData() {
   const getCompetitionLoader = (competitionId: Ref<number>) => {
     const competitionObject: Competition = {
       id: competitionId.value,
@@ -32,11 +32,26 @@ export function useTestMocks() {
   }: {
     competition: Competition
     category: Category
-    fetchEnabled?: Ref<boolean>
+    fetchEnabled: Ref<boolean>
   }) => {
-    const rawRunners = ref(category.runners)
+    const firstFetch = ref(fetchEnabled.value)
 
-    const status = ref<QueryStatus>('success')
+    if (!firstFetch.value) {
+      const unwatch = watch(fetchEnabled, (isEnabled) => {
+        if (isEnabled) {
+          firstFetch.value = true
+          unwatch()
+        }
+      })
+    }
+
+    const rawRunners = computed(() =>
+      firstFetch.value ? category.runners : []
+    )
+
+    const status = computed<QueryStatus>(() =>
+      firstFetch.value ? 'success' : 'loading'
+    )
 
     return { status, rawRunners }
   }

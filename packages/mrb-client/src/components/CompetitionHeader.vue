@@ -23,7 +23,7 @@ const isToolbarDisplayed = ref(false)
     <span>{{ props.competition.name }}</span>
     <span></span>
     <div class="absolute right-3 z-2 bg-header">
-      <RouterLink to="/">Home</RouterLink>
+      <RouterLink data-testid="home-button" to="/">Home</RouterLink>
       <button
         @click="() => settingsStore.setSettingsDisplayed()"
         class="ml-3 i-mdi-cog"
