@@ -74,7 +74,7 @@ export function useLiveResultat() {
   }: {
     competition: Competition
     category: Category
-    fetchEnabled?: Ref<boolean>
+    fetchEnabled: Ref<boolean>
   }) => {
     const lastHash = ref<string>()
     const enabled = computed(() =>

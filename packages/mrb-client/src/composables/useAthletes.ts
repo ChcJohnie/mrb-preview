@@ -6,7 +6,7 @@ import type { Category, RawRunner, RunnerWithStats } from '@/types/category'
 import type { Competition } from '@/types/competition'
 import { formatMinutesSeconds } from '@/utils/dateTime'
 
-type ClassifyRunners = {
+export type ClassifyRunners = {
   finished: RawRunner[]
   unfinished: RawRunner[]
 }
@@ -23,23 +23,18 @@ export function useAthletes({
 }: {
   competition: Competition
   category: Category
-  fetchEnabled?: Ref<boolean>
+  fetchEnabled: Ref<boolean>
 }) {
   const useDataProvider = inject(useDataProviderKey)
   if (!useDataProvider) throw new Error('No data provider found')
   const { getAthletesLoader } = useDataProvider()
 
   /* Runners can be passed with category in test table context */
-  const { rawRunners, status } = category.runners
-    ? {
-        rawRunners: computed(() => category.runners),
-        status: computed(() => 'success'),
-      }
-    : getAthletesLoader({
-        category,
-        competition,
-        fetchEnabled,
-      })
+  const { rawRunners, status } = getAthletesLoader({
+    category,
+    competition,
+    fetchEnabled,
+  })
 
   const athletes = computed((): ClassifyRunners => {
     if (status.value !== 'success' || !rawRunners.value)
@@ -114,6 +109,7 @@ function formatFinishedRunners(data: RawRunner[]): ClassifiedFinishedRunners {
       loss: calculateLoss(firstRow, runner),
     }
   })
+  // TODO Move first place draw athletes to firstRow []
   return { firstRow, restRows }
 }
 
