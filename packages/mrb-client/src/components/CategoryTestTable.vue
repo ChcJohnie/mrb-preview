@@ -2,6 +2,7 @@
 import { provide, ref, unref } from 'vue'
 import { useIntervalFn } from '@vueuse/core'
 
+import DataProvider from './DataProvider.vue'
 import CategoryTable from './CategoryTable.vue'
 
 import { useTableSizingStore } from '@/stores/tableSizing'
@@ -60,10 +61,12 @@ const testCategory: Category = {
 
 <template>
   <div class="flex-1 px-2">
-    <CategoryTable
-      :competition="competition"
-      :competition-id="1"
-      :category="testCategory"
-    />
+    <DataProvider provider="test">
+      <CategoryTable
+        :competition="competition"
+        :competition-id="1"
+        :category="testCategory"
+      />
+    </DataProvider>
   </div>
 </template>
