@@ -30,7 +30,7 @@ const competitionsPaginated = computed(() => {
     Competition list (LiveResultat)
   </h2>
   <div v-if="competitions" class="my-4">
-    <section>
+    <section data-testId="competitions-today">
       <h3 class="text-xl font-bold text-header">LIVE today</h3>
       <ul>
         <li
@@ -39,6 +39,7 @@ const competitionsPaginated = computed(() => {
           class="py-1"
         >
           <RouterLink
+            data-testId="competition-link"
             class="text-lg hover:font-bold hover:underline"
             :to="{
               name: 'event',
@@ -51,7 +52,7 @@ const competitionsPaginated = computed(() => {
       </ul>
     </section>
 
-    <section class="my-4">
+    <section class="my-4" data-testId="competitions-future">
       <h3 class="text-xl font-bold text-header">Upcoming</h3>
       <ul>
         <li
@@ -60,6 +61,7 @@ const competitionsPaginated = computed(() => {
           class="py-1"
         >
           <RouterLink
+            data-testId="competition-link"
             class="text-lg hover:font-bold hover:underline-dashed"
             :to="{
               name: 'event',
@@ -91,7 +93,7 @@ const competitionsPaginated = computed(() => {
       </div>
     </section>
 
-    <section>
+    <section data-testId="competitions-past">
       <h3 class="text-xl font-bold text-header">Past</h3>
       <ul>
         <li
@@ -100,6 +102,7 @@ const competitionsPaginated = computed(() => {
           class="py-1"
         >
           <RouterLink
+            data-testId="competition-link"
             class="text-lg hover:font-bold hover:underline-dashed"
             :to="{
               name: 'event',
