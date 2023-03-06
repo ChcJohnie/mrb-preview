@@ -8,3 +8,6 @@ export interface Competition {
   timediff: number
   categories: Category[]
 }
+
+export type CompetitionWithoutCategories = Omit<Competition, 'categories'>
+export type CompetitionList = CompetitionWithoutCategories[]

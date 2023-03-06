@@ -1,20 +1,44 @@
 import { ref, computed, watch, type Ref } from 'vue'
 
 import { createTestCategories } from '@/utils/testData'
-import type { Competition } from '@/types/competition'
+import type {
+  Competition,
+  CompetitionWithoutCategories,
+  CompetitionList,
+} from '@/types/competition'
 import type { Category } from '@/types/category'
 
 type QueryStatus = 'success' | 'loading' | 'error'
 
-export function useMockData() {
+export const DEFAULT_TEST_SIMPLE_COMPETITION: CompetitionWithoutCategories = {
+  id: 1,
+  name: 'TEST EVENT',
+  organizer: 'TEST CLUB',
+  date: '2023-01-01',
+  timediff: 0,
+}
+
+export const DEFAULT_TEST_COMPETITION: Competition = {
+  ...DEFAULT_TEST_SIMPLE_COMPETITION,
+  categories: createTestCategories(),
+}
+
+export function useMockData({
+  MOCK_COMPETION_LIST,
+}: { MOCK_COMPETION_LIST?: CompetitionList } = {}) {
+  const getCompetitionsLoader = () => {
+    const competitions = computed(
+      () => MOCK_COMPETION_LIST ?? [DEFAULT_TEST_COMPETITION]
+    )
+    const status = ref<QueryStatus>('success')
+
+    return { competitions, status }
+  }
+
   const getCompetitionLoader = (competitionId: Ref<number>) => {
     const competitionObject: Competition = {
+      ...DEFAULT_TEST_COMPETITION,
       id: competitionId.value,
-      name: 'TEST EVENT',
-      organizer: 'TEST CLUB',
-      date: '2023-01-01',
-      timediff: 0,
-      categories: createTestCategories(),
     }
     const competition = computed(() =>
       competitionId.value ? competitionObject : undefined
@@ -57,6 +81,7 @@ export function useMockData() {
   }
 
   return {
+    getCompetitionsLoader,
     getCompetitionLoader,
     getAthletesLoader,
   }

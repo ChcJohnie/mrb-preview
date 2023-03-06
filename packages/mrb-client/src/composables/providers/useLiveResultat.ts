@@ -9,10 +9,31 @@ import {
 } from '@/utils/liveResultat'
 import { getMinutesSecondsFromMilliseconds } from '@/utils/dateTime'
 import type { Category, LSRunner, RawRunner } from '@/types/category'
-import type { Competition } from '@/types/competition'
+import type {
+  Competition,
+  CompetitionWithoutCategories,
+  CompetitionList,
+} from '@/types/competition'
 
-type CompetitionWithoutCategories = Omit<Competition, 'categories'>
 export function useLiveResultat() {
+  const getCompetitionsLoader = () => {
+    const { status, data: competitions } = useQuery({
+      queryKey: ['competitions'],
+      queryFn: async () => {
+        const response = await fetch(
+          `https://liveresultat.orientering.se/api.php?method=getcompetitions`
+        )
+        if (!response.ok) {
+          throw new Error('Network response was not ok')
+        }
+        const jsonObject = await fixEventJSONResponse(response)
+        return jsonObject.competitions as CompetitionList
+      },
+    })
+
+    return { status, competitions }
+  }
+
   const getCompetitionLoader = (competitionId: Ref<number>) => {
     const { data: competitionData } = useQuery({
       queryKey: ['competitionData'],
@@ -122,6 +143,7 @@ export function useLiveResultat() {
   }
 
   return {
+    getCompetitionsLoader,
     getCompetitionLoader,
     getAthletesLoader,
   }

@@ -24,6 +24,32 @@ const TEST_COMPETITION: Competition = {
   ],
 }
 
+const TEST_RESP_COMPETITIONS = {
+  competitions: [
+    {
+      id: 1,
+      name: 'TEST EVENT 1',
+      organizer: 'TEST CLUB',
+      date: '2023-01-01',
+      timediff: 0,
+    },
+    {
+      id: 2,
+      name: 'TEST EVENT 2',
+      organizer: 'TEST CLUB',
+      date: '2023-01-02',
+      timediff: 0,
+    },
+    {
+      id: 3,
+      name: 'TEST EVENT 3',
+      organizer: 'TEST CLUB',
+      date: '2023-01-03',
+      timediff: 0,
+    },
+  ],
+}
+
 const TEST_RESP_ATHELETES = {
   status: 'OK',
   className: 'TEST',
@@ -63,14 +89,22 @@ const TEST_RESP_ATHELETES = {
   hash: 'testhash',
 }
 
-function setupMockServer({ athletesResp = TEST_RESP_ATHELETES } = {}) {
+function setupMockServer({
+  athletesResp = TEST_RESP_ATHELETES,
+  competitionsResp = TEST_RESP_COMPETITIONS,
+} = {}) {
   mockServer.use(
     rest.get('https://liveresultat.orientering.se/api.php', (req, res, ctx) => {
       if (
         req.url.searchParams.get('method') === 'getclassresults' &&
         athletesResp
       )
-        return res.once(ctx.json(TEST_RESP_ATHELETES))
+        return res.once(ctx.json(athletesResp))
+      if (
+        req.url.searchParams.get('method') === 'getcompetitions' &&
+        competitionsResp
+      )
+        return res.once(ctx.json(competitionsResp))
       throw new Error('Unhandled request')
     })
   )
@@ -79,8 +113,19 @@ function setupMockServer({ athletesResp = TEST_RESP_ATHELETES } = {}) {
 afterEach(cleanup)
 
 type UseLiveResultat = ReturnType<typeof useLiveResultat>
-let composable: ReturnType<UseLiveResultat['getAthletesLoader']>
 
+let competitionsComposable: ReturnType<UseLiveResultat['getCompetitionsLoader']>
+const getTestCompetitionsComponent = () =>
+  defineComponent({
+    template: '<div />',
+    setup() {
+      const { getCompetitionsLoader } = useLiveResultat()
+      competitionsComposable = getCompetitionsLoader()
+      return { competitionsComposable }
+    },
+  })
+
+let athletesComposable: ReturnType<UseLiveResultat['getAthletesLoader']>
 const getTestAthletesComponent = ({
   competition,
   category,
@@ -90,21 +135,20 @@ const getTestAthletesComponent = ({
     template: '<div />',
     setup() {
       const { getAthletesLoader } = useLiveResultat()
-      composable = getAthletesLoader({ competition, category, fetchEnabled })
-      return { composable }
+      athletesComposable = getAthletesLoader({
+        competition,
+        category,
+        fetchEnabled,
+      })
+      return { athletesComposable }
     },
   })
 
 describe('useLiveResultat', () => {
-  it('getAthletesLoader should return athletes in common format', async () => {
-    setupMockServer()
-    render(
-      getTestAthletesComponent({
-        competition: TEST_COMPETITION,
-        category: TEST_COMPETITION.categories[0],
-        fetchEnabled: ref(true),
-      }),
-      {
+  describe('getCompetitionsLoader', () => {
+    it('getCompetitionsLoader should return competitions in common format', async () => {
+      setupMockServer()
+      render(getTestCompetitionsComponent(), {
         global: {
           provide: {
             [VUE_QUERY_CLIENT]: new QueryClient({
@@ -116,37 +160,74 @@ describe('useLiveResultat', () => {
             }),
           },
         },
-      }
-    )
-    const { rawRunners, status } = composable
-    await waitFor(() => expect(status.value).toEqual('success'))
-    expect(rawRunners.value?.length).toEqual(3)
-    expect(rawRunners.value?.[0]).toEqual({
-      surname: 'TestRunner1',
-      firstName: '',
-      club: 'OK Club',
-      timeM: 12,
-      timeS: 0,
-      startTime: 1672527600000,
-      status: RunnerStatus.Ok,
+      })
+
+      const { competitions, status } = competitionsComposable
+      await waitFor(() => expect(status.value).toEqual('success'))
+      expect(competitions.value?.length).toEqual(3)
+      expect(competitions.value?.[0]).toEqual({
+        id: 1,
+        name: 'TEST EVENT 1',
+        organizer: 'TEST CLUB',
+        date: '2023-01-01',
+        timediff: 0,
+      })
     })
-    expect(rawRunners.value?.[1]).toEqual({
-      surname: 'TestRunner2',
-      firstName: '',
-      club: 'OK Club',
-      timeM: 13,
-      timeS: 0,
-      startTime: 1672527720000,
-      status: RunnerStatus.Ok,
-    })
-    expect(rawRunners.value?.[2]).toEqual({
-      surname: 'TestRunner3',
-      firstName: '',
-      club: 'OK Club',
-      timeM: 14,
-      timeS: 0,
-      startTime: 1672527840000,
-      status: RunnerStatus.Ok,
+  })
+
+  describe('getAthletesLoader', () => {
+    it('getAthletesLoader should return athletes in common format', async () => {
+      setupMockServer()
+      render(
+        getTestAthletesComponent({
+          competition: TEST_COMPETITION,
+          category: TEST_COMPETITION.categories[0],
+          fetchEnabled: ref(true),
+        }),
+        {
+          global: {
+            provide: {
+              [VUE_QUERY_CLIENT]: new QueryClient({
+                defaultOptions: {
+                  queries: {
+                    retry: false,
+                  },
+                },
+              }),
+            },
+          },
+        }
+      )
+      const { rawRunners, status } = athletesComposable
+      await waitFor(() => expect(status.value).toEqual('success'))
+      expect(rawRunners.value?.length).toEqual(3)
+      expect(rawRunners.value?.[0]).toEqual({
+        surname: 'TestRunner1',
+        firstName: '',
+        club: 'OK Club',
+        timeM: 12,
+        timeS: 0,
+        startTime: 1672527600000,
+        status: RunnerStatus.Ok,
+      })
+      expect(rawRunners.value?.[1]).toEqual({
+        surname: 'TestRunner2',
+        firstName: '',
+        club: 'OK Club',
+        timeM: 13,
+        timeS: 0,
+        startTime: 1672527720000,
+        status: RunnerStatus.Ok,
+      })
+      expect(rawRunners.value?.[2]).toEqual({
+        surname: 'TestRunner3',
+        firstName: '',
+        club: 'OK Club',
+        timeM: 14,
+        timeS: 0,
+        startTime: 1672527840000,
+        status: RunnerStatus.Ok,
+      })
     })
   })
 })

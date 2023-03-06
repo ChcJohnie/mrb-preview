@@ -1,50 +1,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { RouterLink } from 'vue-router'
-import { useQuery } from '@tanstack/vue-query'
-import { isToday, isFuture } from 'date-fns'
 
-import { fixEventJSONResponse } from '@/utils/liveResultat'
-import type { Competition } from '@/types/competition'
+import { useCompetitions } from '@/composables/useCompetitions'
 
-const { data: competitionList } = useQuery({
-  queryKey: ['competitionList'],
-  queryFn: async () => {
-    const response = await fetch(
-      `https://liveresultat.orientering.se/api.php?method=getcompetitions`
-    )
-    if (!response.ok) {
-      throw new Error('Network response was not ok')
-    }
-    const jsonObject = await fixEventJSONResponse(response)
-    return jsonObject.competitions as Competition[]
-  },
-})
-
-const competitionsByPeriod = computed(() => {
-  const baseObject: {
-    future: Competition[]
-    today: Competition[]
-    past: Competition[]
-  } = {
-    future: [],
-    today: [],
-    past: [],
-  }
-  if (!competitionList.value) return baseObject
-  const classifiedByPeriods = competitionList.value.reduce(
-    (filtered, competition) => {
-      const competitionDate = new Date(competition.date)
-      if (isToday(competitionDate)) filtered.today.push(competition)
-      else if (isFuture(competitionDate)) filtered.future.push(competition)
-      else filtered.past.push(competition)
-      return filtered
-    },
-    baseObject
-  )
-  classifiedByPeriods.future.sort((a, b) => (a < b ? 1 : -1)) // Sort futures from nearest to latest
-  return classifiedByPeriods
-})
+const { competitions, competitionsByPeriod } = useCompetitions()
 
 const pagination = ref({
   past: 5,
@@ -69,7 +29,7 @@ const competitionsPaginated = computed(() => {
   <h2 class="text-2xl font-semibold uppercase text-header">
     Competition list (LiveResultat)
   </h2>
-  <div v-if="competitionList" class="my-4">
+  <div v-if="competitions" class="my-4">
     <section>
       <h3 class="text-xl font-bold text-header">LIVE today</h3>
       <ul>

@@ -20,11 +20,28 @@ describe('useMockData', () => {
     ],
   }
 
-  it('should expose getCompetitionLoader and getAthletesLoader', () => {
-    const { getCompetitionLoader, getAthletesLoader } = useMockData()
+  it('should expose getCompetitionsListLoader, getCompetitionLoader and getAthletesLoader', () => {
+    const { getCompetitionsLoader, getCompetitionLoader, getAthletesLoader } =
+      useMockData()
 
+    expect(getCompetitionsLoader).toBeDefined()
     expect(getCompetitionLoader).toBeDefined()
     expect(getAthletesLoader).toBeDefined()
+  })
+
+  it('getCompetitionsLoader returns test competition and status success', () => {
+    const { getCompetitionsLoader } = useMockData()
+    const { competitions, status } = getCompetitionsLoader()
+
+    expect(competitions.value).toBeDefined()
+    expect(competitions.value?.length).toBe(1)
+    expect(competitions.value?.[0].id).toBe(1)
+    expect(competitions.value?.[0].name).toBeDefined()
+    expect(competitions.value?.[0].organizer).toBeDefined()
+    expect(competitions.value?.[0].date).toBeDefined()
+    expect(competitions.value?.[0].timediff).toBeDefined()
+    expect(competitions.value?.[0].categories).toBeDefined()
+    expect(status.value).toBe('success')
   })
 
   it('getCompetitionLoader returns undefined if no id passed', () => {
