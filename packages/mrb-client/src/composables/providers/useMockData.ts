@@ -14,7 +14,7 @@ export const DEFAULT_TEST_SIMPLE_COMPETITION: CompetitionWithoutCategories = {
   id: 1,
   name: 'TEST EVENT',
   organizer: 'TEST CLUB',
-  date: '2023-01-01',
+  date: new Date('2023-01-01'),
   timediff: 0,
 }
 

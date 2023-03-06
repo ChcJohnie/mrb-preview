@@ -4,7 +4,7 @@ export interface Competition {
   id: number
   name: string
   organizer: string
-  date: string
+  date: Date
   timediff: number
   categories: Category[]
 }

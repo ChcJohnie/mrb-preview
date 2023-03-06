@@ -5,14 +5,14 @@ import { mockServer } from '../../../../test/mock-server'
 import { VUE_QUERY_CLIENT, QueryClient } from '@tanstack/vue-query'
 
 import { useLiveResultat } from '../useLiveResultat'
-import type { Competition } from '@/types/competition'
+import type { Competition, CompetitionList } from '@/types/competition'
 import { RunnerStatus } from '@/types/category'
 
 const TEST_COMPETITION: Competition = {
   id: 1,
   name: 'TEST EVENT',
   organizer: 'TEST CLUB',
-  date: '2023-01-01',
+  date: new Date('2023-01-01'),
   timediff: 0,
   categories: [
     {
@@ -30,25 +30,35 @@ const TEST_RESP_COMPETITIONS = {
       id: 1,
       name: 'TEST EVENT 1',
       organizer: 'TEST CLUB',
-      date: '2023-01-01',
+      date: new Date('2023-01-01'),
       timediff: 0,
     },
     {
       id: 2,
       name: 'TEST EVENT 2',
       organizer: 'TEST CLUB',
-      date: '2023-01-02',
+      date: new Date('2023-01-02'),
       timediff: 0,
     },
     {
       id: 3,
       name: 'TEST EVENT 3',
       organizer: 'TEST CLUB',
-      date: '2023-01-03',
+      date: new Date('2023-01-03'),
       timediff: 0,
     },
   ],
 }
+
+const TEST_COMPETITIONS_PARSED: CompetitionList = [
+  {
+    id: 1,
+    name: 'TEST EVENT 1',
+    organizer: 'TEST CLUB',
+    date: new Date('2023-01-01'),
+    timediff: 0,
+  },
+]
 
 const TEST_RESP_ATHELETES = {
   status: 'OK',
@@ -165,13 +175,7 @@ describe('useLiveResultat', () => {
       const { competitions, status } = competitionsComposable
       await waitFor(() => expect(status.value).toEqual('success'))
       expect(competitions.value?.length).toEqual(3)
-      expect(competitions.value?.[0]).toEqual({
-        id: 1,
-        name: 'TEST EVENT 1',
-        organizer: 'TEST CLUB',
-        date: '2023-01-01',
-        timediff: 0,
-      })
+      expect(competitions.value?.[0]).toEqual(TEST_COMPETITIONS_PARSED[0])
     })
   })
 

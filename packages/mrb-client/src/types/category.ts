@@ -8,14 +8,6 @@ export interface Category {
   runners?: RawRunner[]
 }
 
-export interface LSRunner {
-  name: string
-  club: string
-  start: number
-  result: string
-  status: number
-}
-
 export enum RunnerStatus {
   Ok = 1,
   NotCompeting,

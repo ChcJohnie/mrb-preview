@@ -8,12 +8,24 @@ import {
   adjustStartTimeToCET,
 } from '@/utils/liveResultat'
 import { getMinutesSecondsFromMilliseconds } from '@/utils/dateTime'
-import type { Category, LSRunner, RawRunner } from '@/types/category'
+import type { Category, RawRunner } from '@/types/category'
 import type {
   Competition,
   CompetitionWithoutCategories,
   CompetitionList,
 } from '@/types/competition'
+
+type LSCompetition = Competition & {
+  date: string
+}
+
+interface LSRunner {
+  name: string
+  club: string
+  start: number
+  result: string
+  status: number
+}
 
 export function useLiveResultat() {
   const getCompetitionsLoader = () => {
@@ -27,7 +39,10 @@ export function useLiveResultat() {
           throw new Error('Network response was not ok')
         }
         const jsonObject = await fixEventJSONResponse(response)
-        return jsonObject.competitions as CompetitionList
+        return formatLSCompetitionsToRaw(
+          jsonObject.competitions as LSCompetition[],
+          true
+        )
       },
     })
 
@@ -47,7 +62,7 @@ export function useLiveResultat() {
           throw new Error('Network response was not ok')
         }
         const jsonObject = await fixEventJSONResponse(response)
-        return jsonObject as CompetitionWithoutCategories
+        return formatLSCompetitionsToRaw(jsonObject as LSCompetition, false)
       },
     })
 
@@ -156,11 +171,34 @@ function guessGender(className: string) {
   return 'X'
 }
 
+function formatLSCompetitionsToRaw(
+  competition: LSCompetition | LSCompetition[],
+  toArray: true
+): CompetitionList
+function formatLSCompetitionsToRaw(
+  competition: LSCompetition | LSCompetition[],
+  toArray: false
+): CompetitionWithoutCategories
+function formatLSCompetitionsToRaw(
+  competitions: LSCompetition | LSCompetition[],
+  toArray: Boolean
+) {
+  const _competitions = Array.isArray(competitions)
+    ? competitions
+    : [competitions]
+
+  const transformed: CompetitionList = _competitions.map((competition) => ({
+    ...competition,
+    date: new Date(competition.date),
+  }))
+  return toArray ? transformed : transformed[0]
+}
+
 function formatLSRunnersToRaw(
   runners: LSRunner[],
   competition: Competition
 ): RawRunner[] {
-  const todayStartTimeStamp = startOfDay(new Date(competition.date)).valueOf()
+  const todayStartTimeStamp = startOfDay(competition.date).valueOf()
   return runners.map((runner) => {
     const timeMS = parseFloat(runner.result) * 10
     const { minutes: timeM, seconds: timeS } =

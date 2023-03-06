@@ -8,7 +8,7 @@ describe('useMockData', () => {
     id: 1,
     name: 'TEST EVENT',
     organizer: 'TEST CLUB',
-    date: '2023-01-01',
+    date: new Date('2023-01-01'),
     timediff: 0,
     categories: [
       {
@@ -40,7 +40,6 @@ describe('useMockData', () => {
     expect(competitions.value?.[0].organizer).toBeDefined()
     expect(competitions.value?.[0].date).toBeDefined()
     expect(competitions.value?.[0].timediff).toBeDefined()
-    expect(competitions.value?.[0].categories).toBeDefined()
     expect(status.value).toBe('success')
   })
 

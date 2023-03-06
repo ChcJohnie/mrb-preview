@@ -24,16 +24,15 @@ export function useCompetitions() {
     if (!competitions.value) return baseObject
     const classifiedByPeriods = competitions.value.reduce(
       (filtered, competition) => {
-        const competitionDate = new Date(competition.date)
-        if (isToday(competitionDate)) filtered.today.push(competition)
-        else if (isFuture(competitionDate)) filtered.future.push(competition)
+        if (isToday(competition.date)) filtered.today.push(competition)
+        else if (isFuture(competition.date)) filtered.future.push(competition)
         else filtered.past.push(competition)
         return filtered
       },
       baseObject
     )
-    classifiedByPeriods.future.sort((a, b) => (a < b ? 1 : -1)) // Sort futures from nearest to latest
-    classifiedByPeriods.past.sort((a, b) => (a > b ? 1 : -1)) // Sort futures from nearest to latest
+    classifiedByPeriods.future.sort((a, b) => (a.date > b.date ? 1 : -1)) // Sort futures from nearest to latest
+    classifiedByPeriods.past.sort((a, b) => (a.date < b.date ? 1 : -1)) // Sort futures from nearest to latest
     return classifiedByPeriods
   })
 

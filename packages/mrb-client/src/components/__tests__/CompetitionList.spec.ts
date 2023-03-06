@@ -9,15 +9,15 @@ import { useDataProviderKey } from '@/types/providers'
 
 const today = new Date()
 const TEST_COMPETITION = [
-  { ...DEFAULT_TEST_SIMPLE_COMPETITION, date: today.toISOString(), id: 1 },
+  { ...DEFAULT_TEST_SIMPLE_COMPETITION, date: today, id: 1 },
   {
     ...DEFAULT_TEST_SIMPLE_COMPETITION,
-    date: addDays(today, 1).toISOString(),
+    date: addDays(today, 1),
     id: 2,
   },
   {
     ...DEFAULT_TEST_SIMPLE_COMPETITION,
-    date: subDays(today, 1).toISOString(),
+    date: subDays(today, 1),
     id: 3,
   },
 ]
