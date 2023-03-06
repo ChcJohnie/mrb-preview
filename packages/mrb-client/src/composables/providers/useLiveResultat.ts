@@ -1,6 +1,6 @@
 import { ref, computed, type Ref } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
-import { startOfToday } from 'date-fns'
+import { startOfDay } from 'date-fns'
 
 import {
   fixEventJSONResponse,
@@ -138,7 +138,7 @@ function formatLSRunnersToRaw(
   runners: LSRunner[],
   competition: Competition
 ): RawRunner[] {
-  const todayStartTimeStamp = startOfToday().valueOf()
+  const todayStartTimeStamp = startOfDay(new Date(competition.date)).valueOf()
   return runners.map((runner) => {
     const timeMS = parseFloat(runner.result) * 10
     const { minutes: timeM, seconds: timeS } =
