@@ -9,9 +9,14 @@ function _useTimeHelpers() {
     minute: 'numeric',
     second: 'numeric',
   })
+  const dateTimeFormatter = new Intl.DateTimeFormat('default', {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  })
 
   const now = useNow({ interval: 500 })
   const nowFormatted = computed(() => timeFormatter.format(now.value))
 
-  return { timeFormatter, now, nowFormatted }
+  return { dateTimeFormatter, timeFormatter, now, nowFormatted }
 }

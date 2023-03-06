@@ -20,6 +20,7 @@ const { competitions, competitionsByPeriod } = useCompetitions()
       <CompetitionSublist
         :competitions="competitionsByPeriod.future"
         :is-paginated="true"
+        :show-date="true"
       >
         Upcoming
       </CompetitionSublist>
@@ -29,6 +30,7 @@ const { competitions, competitionsByPeriod } = useCompetitions()
       <CompetitionSublist
         :competitions="competitionsByPeriod.past"
         :is-paginated="true"
+        :show-date="true"
       >
         Past
       </CompetitionSublist>

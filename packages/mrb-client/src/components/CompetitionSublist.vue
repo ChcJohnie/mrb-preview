@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { RouterLink } from 'vue-router'
+
+import { useTimeHelpers } from '@/composables/useTimeHelpers'
 import type { CompetitionList } from '@/types/competition'
 
 const props = defineProps<{
   competitions: CompetitionList
   isPaginated?: Boolean
+  showDate?: Boolean
 }>()
+
+const { dateTimeFormatter } = useTimeHelpers()
 
 const pagination = ref(5)
 const paginate = (full: boolean) => {
@@ -37,7 +42,10 @@ const competitionsPaginated = computed(() =>
           params: { competitionId: competition.id },
         }"
       >
-        ({{ competition.date }}) {{ competition.name }}
+        <span v-if="showDate"
+          >({{ dateTimeFormatter.format(competition.date) }})
+        </span>
+        {{ competition.name }}
       </RouterLink>
     </li>
   </ul>

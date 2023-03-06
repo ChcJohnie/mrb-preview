@@ -23,6 +23,39 @@ describe('useCompetitions', () => {
     },
   ]
 
+  const TEST_COMPETITIONS_UNSORTED = [
+    {
+      ...DEFAULT_TEST_SIMPLE_COMPETITION,
+      date: addDays(today, 2),
+      id: 1,
+    },
+    {
+      ...DEFAULT_TEST_SIMPLE_COMPETITION,
+      date: addDays(today, 1),
+      id: 2,
+    },
+    {
+      ...DEFAULT_TEST_SIMPLE_COMPETITION,
+      date: addDays(today, 3),
+      id: 3,
+    },
+    {
+      ...DEFAULT_TEST_SIMPLE_COMPETITION,
+      date: subDays(today, 2),
+      id: 4,
+    },
+    {
+      ...DEFAULT_TEST_SIMPLE_COMPETITION,
+      date: subDays(today, 1),
+      id: 5,
+    },
+    {
+      ...DEFAULT_TEST_SIMPLE_COMPETITION,
+      date: subDays(today, 3),
+      id: 6,
+    },
+  ]
+
   describe('useAthletes', () => {
     /*
       Test useAthletes with official useTestMocks data provider
@@ -86,6 +119,30 @@ describe('useCompetitions', () => {
       expect(result.competitionsByPeriod.value.future[0].id).toEqual(2)
       expect(result.competitionsByPeriod.value.past.length).toEqual(1)
       expect(result.competitionsByPeriod.value.past[0].id).toEqual(3)
+    })
+
+    it('should return competitions classified by period and sorted by date (future from first, past from last)', () => {
+      render(getTestComponent(), {
+        global: {
+          provide: {
+            [useDataProviderKey as symbol]: () =>
+              useMockData({ MOCK_COMPETION_LIST: TEST_COMPETITIONS_UNSORTED }),
+          },
+        },
+      })
+
+      expect(result.status.value).toEqual('success')
+      expect(result.competitions.value?.length).toEqual(6)
+
+      expect(result.competitionsByPeriod.value.future.length).toEqual(3)
+      expect(result.competitionsByPeriod.value.future[0].id).toEqual(2)
+      expect(result.competitionsByPeriod.value.future[1].id).toEqual(1)
+      expect(result.competitionsByPeriod.value.future[2].id).toEqual(3)
+
+      expect(result.competitionsByPeriod.value.past.length).toEqual(3)
+      expect(result.competitionsByPeriod.value.past[0].id).toEqual(5)
+      expect(result.competitionsByPeriod.value.past[1].id).toEqual(4)
+      expect(result.competitionsByPeriod.value.past[2].id).toEqual(6)
     })
   })
 })

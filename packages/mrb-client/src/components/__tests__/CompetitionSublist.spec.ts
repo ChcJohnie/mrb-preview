@@ -60,7 +60,23 @@ describe('CompetitionSublist', () => {
     })
     expect(oneEventLink).toHaveAttribute('href', '/event/1')
 
-    expect(getByText('TEST LIST')).toBeInTheDocument()
+    getByText('TEST LIST')
+    expect(() => getByText(/\d+. \d+. \d+/)).toThrow()
+  })
+
+  it('can show date in list item', () => {
+    const { getByText, getAllByText } = render(CompetitionSublist, {
+      props: { competitions: TEST_COMPETITIONS_3_ITEMS, showDate: true },
+      global: {
+        plugins: [router],
+      },
+      slots: {
+        default: 'TEST LIST',
+      },
+    })
+
+    getByText('TEST LIST')
+    getAllByText(/\d+. \d+. \d+/)
   })
 
   it('should render competitions with pagination', async () => {
