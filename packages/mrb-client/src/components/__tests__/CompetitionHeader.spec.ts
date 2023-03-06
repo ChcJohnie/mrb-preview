@@ -11,7 +11,7 @@ describe('CompetitionHeader', () => {
     id: 1,
     name: 'Test Competition',
     organizer: 'Test Organizer',
-    date: '2023-01-01',
+    date: new Date('2023-01-01'),
     timediff: 0,
     categories: [],
   }

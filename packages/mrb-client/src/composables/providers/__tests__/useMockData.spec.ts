@@ -8,7 +8,7 @@ describe('useMockData', () => {
     id: 1,
     name: 'TEST EVENT',
     organizer: 'TEST CLUB',
-    date: '2023-01-01',
+    date: new Date('2023-01-01'),
     timediff: 0,
     categories: [
       {
@@ -20,11 +20,27 @@ describe('useMockData', () => {
     ],
   }
 
-  it('should expose getCompetitionLoader and getAthletesLoader', () => {
-    const { getCompetitionLoader, getAthletesLoader } = useMockData()
+  it('should expose getCompetitionsListLoader, getCompetitionLoader and getAthletesLoader', () => {
+    const { getCompetitionsLoader, getCompetitionLoader, getAthletesLoader } =
+      useMockData()
 
+    expect(getCompetitionsLoader).toBeDefined()
     expect(getCompetitionLoader).toBeDefined()
     expect(getAthletesLoader).toBeDefined()
+  })
+
+  it('getCompetitionsLoader returns test competition and status success', () => {
+    const { getCompetitionsLoader } = useMockData()
+    const { competitions, status } = getCompetitionsLoader()
+
+    expect(competitions.value).toBeDefined()
+    expect(competitions.value?.length).toBe(1)
+    expect(competitions.value?.[0].id).toBe(1)
+    expect(competitions.value?.[0].name).toBeDefined()
+    expect(competitions.value?.[0].organizer).toBeDefined()
+    expect(competitions.value?.[0].date).toBeDefined()
+    expect(competitions.value?.[0].timediff).toBeDefined()
+    expect(status.value).toBe('success')
   })
 
   it('getCompetitionLoader returns undefined if no id passed', () => {

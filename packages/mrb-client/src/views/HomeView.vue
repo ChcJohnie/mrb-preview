@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import DataProvider from '@/components/DataProvider.vue'
 import CompetitionList from '@/components/CompetitionList.vue'
 </script>
 
@@ -18,7 +19,9 @@ import CompetitionList from '@/components/CompetitionList.vue'
     <main
       class="competition-list w-140 justify-self-center lg:justify-self-end lg:pr-4 lg:border-r-3 lg:border-female"
     >
-      <CompetitionList />
+      <DataProvider provider="liveResultat">
+        <CompetitionList />
+      </DataProvider>
     </main>
     <section class="about flex flex-col gap-4 w-140 text-lg lg:pl-8">
       <h2 class="text-2xl font-semibold uppercase text-header">About MRB</h2>

@@ -7,7 +7,7 @@ import { useMockData } from '@/composables/providers/useMockData'
 import { useDataProviderKey, type DataProviderSet } from '@/types/providers'
 
 const props = defineProps<{
-  provider: string
+  provider: 'liveResultat' | 'test'
 }>()
 
 const providerList: { [providerName: string]: DataProviderSet } = {

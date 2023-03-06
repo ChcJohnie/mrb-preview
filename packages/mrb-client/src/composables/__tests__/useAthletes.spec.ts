@@ -45,7 +45,7 @@ describe('useAthletes', () => {
       id: 1,
       name: 'TestComp',
       organizer: 'TestOrg',
-      date: new Date().toISOString(),
+      date: new Date(),
       timediff: 0,
       categories: [{ id: 1, name: 'TestCat', gender: 'X' }],
     }

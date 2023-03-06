@@ -1,6 +1,6 @@
 import { ref, computed, type Ref } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
-import { startOfToday } from 'date-fns'
+import { startOfDay } from 'date-fns'
 
 import {
   fixEventJSONResponse,
@@ -8,11 +8,47 @@ import {
   adjustStartTimeToCET,
 } from '@/utils/liveResultat'
 import { getMinutesSecondsFromMilliseconds } from '@/utils/dateTime'
-import type { Category, LSRunner, RawRunner } from '@/types/category'
-import type { Competition } from '@/types/competition'
+import type { Category, RawRunner } from '@/types/category'
+import type {
+  Competition,
+  CompetitionWithoutCategories,
+  CompetitionList,
+} from '@/types/competition'
 
-type CompetitionWithoutCategories = Omit<Competition, 'categories'>
+type LSCompetition = Competition & {
+  date: string
+}
+
+interface LSRunner {
+  name: string
+  club: string
+  start: number
+  result: string
+  status: number
+}
+
 export function useLiveResultat() {
+  const getCompetitionsLoader = () => {
+    const { status, data: competitions } = useQuery({
+      queryKey: ['competitions'],
+      queryFn: async () => {
+        const response = await fetch(
+          `https://liveresultat.orientering.se/api.php?method=getcompetitions`
+        )
+        if (!response.ok) {
+          throw new Error('Network response was not ok')
+        }
+        const jsonObject = await fixEventJSONResponse(response)
+        return formatLSCompetitionsToRaw(
+          jsonObject.competitions as LSCompetition[],
+          true
+        )
+      },
+    })
+
+    return { status, competitions }
+  }
+
   const getCompetitionLoader = (competitionId: Ref<number>) => {
     const { data: competitionData } = useQuery({
       queryKey: ['competitionData'],
@@ -26,7 +62,7 @@ export function useLiveResultat() {
           throw new Error('Network response was not ok')
         }
         const jsonObject = await fixEventJSONResponse(response)
-        return jsonObject as CompetitionWithoutCategories
+        return formatLSCompetitionsToRaw(jsonObject as LSCompetition, false)
       },
     })
 
@@ -122,6 +158,7 @@ export function useLiveResultat() {
   }
 
   return {
+    getCompetitionsLoader,
     getCompetitionLoader,
     getAthletesLoader,
   }
@@ -134,11 +171,34 @@ function guessGender(className: string) {
   return 'X'
 }
 
+function formatLSCompetitionsToRaw(
+  competition: LSCompetition | LSCompetition[],
+  toArray: true
+): CompetitionList
+function formatLSCompetitionsToRaw(
+  competition: LSCompetition | LSCompetition[],
+  toArray: false
+): CompetitionWithoutCategories
+function formatLSCompetitionsToRaw(
+  competitions: LSCompetition | LSCompetition[],
+  toArray: Boolean
+) {
+  const _competitions = Array.isArray(competitions)
+    ? competitions
+    : [competitions]
+
+  const transformed: CompetitionList = _competitions.map((competition) => ({
+    ...competition,
+    date: new Date(competition.date),
+  }))
+  return toArray ? transformed : transformed[0]
+}
+
 function formatLSRunnersToRaw(
   runners: LSRunner[],
   competition: Competition
 ): RawRunner[] {
-  const todayStartTimeStamp = startOfToday().valueOf()
+  const todayStartTimeStamp = startOfDay(competition.date).valueOf()
   return runners.map((runner) => {
     const timeMS = parseFloat(runner.result) * 10
     const { minutes: timeM, seconds: timeS } =
